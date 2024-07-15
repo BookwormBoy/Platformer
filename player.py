@@ -7,6 +7,7 @@ class Player(pygame.sprite.Sprite):
         self.image.fill('red')
         self.rect = self.image.get_rect(topleft=pos)
         self.pos = pygame.math.Vector2(self.rect.x, self.rect.y)
+        self.coords = pygame.math.Vector2(self.rect.x, self.rect.y)
         self.vel = pygame.math.Vector2(0, 0)
         self.acc = pygame.math.Vector2(0, 0)
 
@@ -33,7 +34,7 @@ class Player(pygame.sprite.Sprite):
 
         if keys[pygame.K_c] and self.on_ground: #jump
             self.jumped=True
-            self.vel.y = -14
+            self.vel.y = -17
 
         if keys[pygame.K_c] and self.jumped:
             self.slow_jump=True

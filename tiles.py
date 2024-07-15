@@ -8,6 +8,7 @@ class Tile(pygame.sprite.Sprite):
         self.rect=self.image.get_rect(topleft = pos)
 
         self.pos = pygame.math.Vector2(self.rect.x, self.rect.y)
+        self.coords = pygame.math.Vector2(self.rect.x, self.rect.y)
         self.vel = pygame.math.Vector2(0, 0)
         self.acc = pygame.math.Vector2(0,0)
     def update(self, x_shift, y_shift):
