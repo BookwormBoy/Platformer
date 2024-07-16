@@ -48,7 +48,7 @@ class Level:
 
        
 
-        print(player.coords.x, player.pos.x, self.shift_x)
+        # print(player.coords.x, player.pos.x, self.shift_x)
 
     def scroll_y(self):
         self.shift_y=0
