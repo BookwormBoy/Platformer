@@ -105,12 +105,14 @@ class Level:
                 # print('cx', tile.rect.top, player.rect.top)
                 if player.vel.x<0:
                     player.pos.x = tile.rect.right
+                    player.touching_wall_l=True
                     player.coords.x = tile.coords.x+tile_size
                     player.rect.x = int(player.pos.x)
                     player.vel.x=0
 
                 elif player.vel.x>0:
                     player.pos.x = tile.rect.left - player.rect.width
+                    player.touching_wall_r=True
                     player.rect.x = int(player.pos.x)
                     player.coords.x = tile.coords.x - player.rect.width
                     # print(player.pos.x, player.rect.x)
@@ -123,6 +125,8 @@ class Level:
         player.acc.y = 0.6
         if(player.slow_jump):
             player.acc.y=0.45
+        if(player.status=='wall_slide'):
+            player.acc.y=0.2
         player.vel.y+=player.acc.y
         player.pos.y += player.vel.y
         player.coords.y += player.vel.y
@@ -155,8 +159,10 @@ class Level:
                     player.jumped=False
 
 
-        if player.on_ground and player.vel.y!=0:
+        if player.on_ground and (player.vel.y>1 or player.vel.y<0):
             player.on_ground = False
+
+        # print(player.on_ground)
 
         # print()
         

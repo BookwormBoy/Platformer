@@ -19,14 +19,18 @@ class Player(pygame.sprite.Sprite):
         self.jumped=False
         self.slow_jump=False
         self.facing_right=True
+        self.touching_wall_l=False
+        self.touching_wall_r=False
 
     def import_character_assets(self):
         character_path='/home/siddharth-kini/Platformer/graphics/character/'
-        self.animations={'idle':[], 'walk':[], 'jump':[], 'fall':[]}
+        self.animations={'idle':[], 'walk':[], 'jump':[], 'fall':[], 'wall_slide':[]}
+        cx={'idle':14, 'jump':17, 'walk':21, 'fall':17, 'wall_slide':15}
+        cy={'idle':6, 'jump':7, 'walk':7, 'fall':1, 'wall_slide':3}
 
         for animation in self.animations.keys():
             full_path = character_path + animation
-            self.animations[animation]=import_folder(full_path)
+            self.animations[animation]=import_folder(full_path, cx[animation], cy[animation])
 
     def get_input(self):
         keys = pygame.key.get_pressed()
@@ -57,6 +61,13 @@ class Player(pygame.sprite.Sprite):
             self.slow_jump=True
         else:
             self.slow_jump=False
+
+        if keys[pygame.K_c] and self.status=='wall_slide':
+            self.vel.y-=25
+            if self.touching_wall_r:
+                self.vel.x-=15
+            elif self.touching_wall_l:
+                self.vel.x+=15
         
 
 
@@ -64,19 +75,37 @@ class Player(pygame.sprite.Sprite):
 
         keys = pygame.key.get_pressed()
 
-        if(self.status=='jump' and self.vel.y>=0):
-            self.status='fall'
-        elif(self.vel.y>1):
-            self.status='fall'
-        elif(self.vel.y<0):
-            self.status='jump'
-        else:
-            if(self.vel.x!=0):
-                self.status='walk'
-            else:
+        if self.on_ground:
+            if self.touching_wall_l or self.touching_wall_r:
                 self.status='idle'
+            else:
+                if self.vel.x==0:
+                    self.status='idle'
+                else:
+                    self.status='walk'
+        else:
+            if self.vel.y>=0:
+                if self.touching_wall_l or self.touching_wall_r:
+                    if self.touching_wall_l and keys[pygame.K_LEFT]:
+                        self.status='wall_slide'
+                    elif self.touching_wall_r and keys[pygame.K_RIGHT]:
+                        self.status='wall_slide'
+                    else:
+                        self.status='fall'
+                else:
+                    self.status='fall'
+            else:
+                self.status='jump'
 
-        # print(self.status)
+        if self.touching_wall_l and keys[pygame.K_RIGHT]:
+            self.touching_wall_l=False
+
+        if self.touching_wall_r and keys[pygame.K_LEFT]:
+            self.touching_wall_r=False
+
+        # print(self.touching_wall_r)
+
+        # print(self.status, self.vel.x)
 
     def animate(self):
         animation = self.animations[self.status]
