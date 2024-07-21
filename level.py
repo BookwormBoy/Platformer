@@ -89,10 +89,10 @@ class Level:
 
         player = self.player.sprite
         player.vel.x+=player.acc.x
-        if(player.vel.x>3):
-            player.vel.x=3
-        if(player.vel.x<-3):
-            player.vel.x=-3
+        if(player.vel.x>player.runspeed):
+            player.vel.x=player.runspeed
+        if(player.vel.x<-player.runspeed):
+            player.vel.x=-player.runspeed
         player.pos.x += player.vel.x
         player.coords.x += player.vel.x
         player.rect.x = int(player.pos.x)
@@ -198,7 +198,11 @@ class Level:
         self.y_collisions()
         # print(player.coords, player.pos, player.vel)
         # print('a', player.vel)
+        if player.sliding:
+            player.rect.y+=25
         self.player.draw(self.display_surface)
+        if player.sliding:
+            player.rect.y-=25
 
         
 

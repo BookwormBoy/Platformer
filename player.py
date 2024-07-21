@@ -6,13 +6,18 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.import_character_assets()
         self.frame_index=0
-        self.animation_speed=0.05
+        self.animation_speed=0.10
         self.image = self.animations['idle'][self.frame_index]
         self.rect = self.image.get_rect(topleft=pos)
+        self.slide_rect = (self.rect.x, self.rect.y+12, self.rect.width+12, self.rect.height-12)
         self.pos = pygame.math.Vector2(self.rect.x, self.rect.y)
         self.coords = pygame.math.Vector2(self.rect.x, self.rect.y)
         self.vel = pygame.math.Vector2(0, 0)
         self.acc = pygame.math.Vector2(0, 0)
+        self.walkspeed=3
+        self.runacc=0.1
+        self.rundec=0.2
+        self.runspeed=8
 
         self.on_ground = True
         self.status='idle'
@@ -21,32 +26,106 @@ class Player(pygame.sprite.Sprite):
         self.facing_right=True
         self.touching_wall_l=False
         self.touching_wall_r=False
+        self.sliding=False
+        self.slowdown=False
 
     def import_character_assets(self):
-        character_path='/home/siddharth-kini/Platformer/graphics/character/'
-        self.animations={'idle':[], 'walk':[], 'jump':[], 'fall':[], 'wall_slide':[]}
-        cx={'idle':14, 'jump':17, 'walk':21, 'fall':17, 'wall_slide':15}
-        cy={'idle':6, 'jump':7, 'walk':7, 'fall':1, 'wall_slide':3}
+        character_path='./graphics/character/'
+        self.animations={'idle':[], 'walk':[], 'jump':[], 'fall':[], 'wall_slide':[], 'run':[], 'slide':[]}
+        cx={'idle':14, 'jump':17, 'walk':21, 'fall':17, 'wall_slide':15, 'run': 17, 'slide':9}
+        cy={'idle':6, 'jump':7, 'walk':7, 'fall':1, 'wall_slide':3, 'run':7, 'slide':19}
+        w={'idle':19, 'jump':19, 'walk':19, 'fall':19, 'wall_slide':19, 'run': 19, 'slide':31}
+        h={'idle':30, 'jump':30, 'walk':30, 'fall':30, 'wall_slide':30, 'run': 30, 'slide':18}
+
 
         for animation in self.animations.keys():
             full_path = character_path + animation
-            self.animations[animation]=import_folder(full_path, cx[animation], cy[animation])
+            self.animations[animation]=import_folder(full_path, cx[animation], cy[animation], w[animation], h[animation])
 
     def get_input(self):
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_RIGHT]: #x movement
-            self.acc.x = 0.1
-        elif keys[pygame.K_LEFT]:
-            self.acc.x = -0.1
+
+        if self.vel.x==0:  #x-movement
+            self.sliding=False
+            if keys[pygame.K_RIGHT]:
+                self.slowdown=False
+                if keys[pygame.K_s]:
+                    self.acc.x=self.runacc
+                else:
+                    self.vel.x=self.walkspeed
+                    self.acc.x=0
+            elif keys[pygame.K_LEFT]:
+                self.slowdown=False
+                if keys[pygame.K_s]:
+                    self.acc.x=-self.runacc
+                else:
+                    self.vel.x=-self.walkspeed
+                    self.acc.x=0
+        elif (abs(self.vel.x))<=self.walkspeed:
+            if self.sliding:
+                if self.vel.x>0 and not keys[pygame.K_LEFT]:
+                    self.sliding=False
+                elif self.vel.x<0 and not keys[pygame.K_RIGHT]:
+                    self.sliding=False
+            else:
+                if keys[pygame.K_RIGHT]:
+                    self.slowdown=False
+                    if keys[pygame.K_s]:
+                        self.acc.x=self.runacc
+                    else:
+                        self.vel.x=self.walkspeed
+                        self.acc.x=0
+                elif keys[pygame.K_LEFT]:
+                    self.slowdown=False
+                    if keys[pygame.K_s]:
+                        self.acc.x=-self.runacc
+                    else:
+                        self.vel.x=-self.walkspeed
+                        self.acc.x=0
+                else:
+                    self.vel.x=0
         else:
+            if self.sliding:
+                if self.vel.x>0 and not keys[pygame.K_LEFT]:
+                    self.sliding=False
+                elif self.vel.x<0 and not keys[pygame.K_RIGHT]:
+                    self.sliding=False
+            else:
+                if keys[pygame.K_s]:
+                    if keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
+                        if keys[pygame.K_RIGHT] and self.vel.x<0:
+                            self.sliding=True
+                            self.slowdown=True
+                        elif keys[pygame.K_RIGHT] and self.vel.x>0:
+                            self.slowdown=False
+                            self.acc.x=self.runacc
+                        elif keys[pygame.K_LEFT] and self.vel.x>0:
+                            self.sliding=True
+                            self.slowdown=True
+                        elif keys[pygame.K_LEFT] and self.vel.x<0:
+                            self.slowdown=False
+                            self.acc.x=-self.runacc
+                    else:
+                        self.slowdown=True
+                else:
+                    self.slowdown=True
+
+        if not self.on_ground:
+            self.sliding=False
+
+        if self.slowdown:
             if(self.vel.x>0.1):
-                self.acc.x = -0.1
+                self.acc.x = -self.rundec
             elif(self.vel.x<-0.1):
-                self.acc.x = 0.1
+                self.acc.x = self.rundec
             else:
                 self.acc.x=0
                 self.vel.x=0
+
+
+        # print(self.acc.x, self.vel.x, self.sliding, self.slowdown)
+                          
 
         if self.vel.x>0:
             self.facing_right=True
@@ -82,7 +161,13 @@ class Player(pygame.sprite.Sprite):
                 if self.vel.x==0:
                     self.status='idle'
                 else:
-                    self.status='walk'
+                    if self.sliding:
+                        self.status='slide'
+                    else:
+                        if abs(self.vel.x)<=self.walkspeed:
+                            self.status='walk'
+                        else:
+                            self.status='run'
         else:
             if self.vel.y>=0:
                 if self.touching_wall_l or self.touching_wall_r:
@@ -128,6 +213,8 @@ class Player(pygame.sprite.Sprite):
         self.get_input()
         self.get_status()
         self.animate()
+        self.slide_rect = (self.rect.x, self.rect.y+12, self.rect.width+12, self.rect.height-12)
+
         
         
         
