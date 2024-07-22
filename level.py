@@ -93,6 +93,13 @@ class Level:
             player.vel.x=player.runspeed
         if(player.vel.x<-player.runspeed):
             player.vel.x=-player.runspeed
+        
+        f=0
+        if player.status=='wall_slide':
+            if player.touching_wall_r:
+                player.vel.x+=1
+            elif player.touching_wall_l:
+                player.vel.x-=1
         player.pos.x += player.vel.x
         player.coords.x += player.vel.x
         player.rect.x = int(player.pos.x)
@@ -101,6 +108,7 @@ class Level:
         for tile in self.tiles.sprites():
             # print(tile.rect.top, end=' ')
             if tile.rect.colliderect(player.rect):
+                f=1
                 # print('c')
                 # print('cx', tile.rect.top, player.rect.top)
                 if player.vel.x<0:
@@ -118,11 +126,16 @@ class Level:
                     # print(player.pos.x, player.rect.x)
                     player.vel.x = 0
         
+        if player.status=='wall_slide' and f==0:
+            if player.touching_wall_l:
+                player.touching_wall_l=False
+            elif player.touching_wall_r:
+                player.touching_wall_r=False
         # print()
     def y_collisions(self):
 
         player = self.player.sprite
-        player.acc.y = 0.6
+        player.acc.y = 0.9
         if(player.slow_jump):
             player.acc.y=0.45
         if(player.status=='wall_slide'):
