@@ -30,6 +30,8 @@ class Player(pygame.sprite.Sprite):
         self.sliding=False
         self.slowdown=False
         self.jump_cancelled=False
+        self.stationary_x=True
+        self.on_h_platform=True
 
     def import_character_assets(self):
         character_path='./graphics/character/'
@@ -155,6 +157,11 @@ class Player(pygame.sprite.Sprite):
         elif self.vel.x<0 and not self.jump_cancelled:
             self.facing_right=False
 
+        if self.vel.x==0:
+            self.stationary_x=True
+        else:
+            self.stationary_x=False
+
         if keys[pygame.K_c] and self.on_ground: #jump
             self.jumped=True
             self.vel.y = -17
@@ -213,7 +220,7 @@ class Player(pygame.sprite.Sprite):
 
         # print(self.touching_wall_r)
 
-        print(self.status, self.touching_wall_r, self.touching_wall_l, self.vel.x)
+        # print(self.status, self.touching_wall_r, self.touching_wall_l, self.vel.x)
 
     def animate(self):
         animation = self.animations[self.status]

@@ -1,5 +1,5 @@
 import pygame
-from tiles import Tile
+from tiles import *
 from player import Player
 from settings import *
 
@@ -13,6 +13,8 @@ class Level:
 
         self.shifted=False
         self.start_ypos=0
+        self.hp_speed=0
+        self.prev_hp_speed=0
     
     def setup_level(self, layout ):
         self.tiles = pygame.sprite.Group()
@@ -20,6 +22,7 @@ class Level:
         self.ropes = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
         self.enemy = pygame.sprite.GroupSingle()
+        self.h_moving_platforms=pygame.sprite.Group()
         for row_index,row in enumerate(layout):
             for col_index, cell in enumerate(row):
                 x=tile_size*col_index
@@ -30,6 +33,10 @@ class Level:
                 elif cell == 'P':
                     p = Player((x, y))
                     self.player.add(p)
+                elif cell == 'H':
+                    p=H_Moving_Platform((x, y), tile_size)
+                    self.tiles.add(p)
+                    self.h_moving_platforms.add(p)
 
     def scroll_x(self):
         self.shift_x = 0
@@ -86,8 +93,16 @@ class Level:
         # print(self.start_ypos)
 
     def x_collisions(self):
-
         player = self.player.sprite
+        # print(player.on_h_platform)
+        # if player.on_h_platform:
+        #     print(player.vel.x, self.hp_speed, self.prev_hp_speed)
+
+        #     player.vel.x-=self.prev_hp_speed
+        #     player.vel.x+=self.hp_speed
+        #     print('a', player.vel.x)
+        #     self.prev_hp_speed=self.hp_speed
+
         player.vel.x+=player.acc.x
         if(player.vel.x>player.runspeed):
             player.vel.x=player.runspeed
@@ -95,47 +110,68 @@ class Level:
             player.vel.x=-player.runspeed
         
         f=0
-        if player.status=='wall_slide':
+        if player.status=='wall_slide' or player.vel.x==0:
             if player.touching_wall_r:
                 player.vel.x+=1
             elif player.touching_wall_l:
                 player.vel.x-=1
+
+        
+
         player.pos.x += player.vel.x
         player.coords.x += player.vel.x
+        if player.on_h_platform:
+            player.pos.x+=self.hp_speed
+            player.coords.x+=self.hp_speed
         player.rect.x = int(player.pos.x)
+        for p in self.h_moving_platforms:
+            p.move()
         self.tiles.update(self.shift_x, 0)
-        # print('x_col', player.pos.y, player.rect.y)
+
+        for p in self.h_moving_platforms:
+            print('pv', p.vel.x)
+        
+        # print('x_sol', player.rect.x+player.rect.width, player.rect.y)
         for tile in self.tiles.sprites():
             # print(tile.rect.top, end=' ')
             if tile.rect.colliderect(player.rect):
                 f=1
                 # print('c')
                 # print('cx', tile.rect.top, player.rect.top)
-                if player.vel.x<0:
+                vel=player.vel.x-tile.vel.x
+                if vel<0:
                     player.pos.x = tile.rect.right
                     player.touching_wall_l=True
                     player.coords.x = tile.coords.x+tile_size
                     player.rect.x = int(player.pos.x)
                     player.vel.x=0
 
-                elif player.vel.x>0:
+                elif vel>0:
                     player.pos.x = tile.rect.left - player.rect.width
                     player.touching_wall_r=True
                     player.rect.x = int(player.pos.x)
                     player.coords.x = tile.coords.x - player.rect.width
                     # print(player.pos.x, player.rect.x)
                     player.vel.x = 0
+
         
         if player.status=='wall_slide' and f==0:
             if player.touching_wall_l:
                 player.touching_wall_l=False
             elif player.touching_wall_r:
                 player.touching_wall_r=False
-        # print()
+
+        if player.stationary_x and f==0:
+            if player.touching_wall_l:
+                player.touching_wall_l=False
+            elif player.touching_wall_r:
+                player.touching_wall_r=False
+
+        # print('b', player.vel.x)
     def y_collisions(self):
 
         player = self.player.sprite
-        player.acc.y = 0.9
+        player.acc.y = 1
         if(player.slow_jump):
             player.acc.y=0.45
         if(player.status=='wall_slide'):
@@ -145,15 +181,18 @@ class Level:
         player.coords.y += player.vel.y
         player.rect.y = int(player.pos.y)
         self.tiles.update(0, self.shift_y)
+       
         # print(player.vel.y)
-        # print('b', player.vel.x, player.rect.x)
-        # print('y_col_1', player.pos.y, player.rect.y)
+        # print('b', player.vel.x, player.rect.x, player.rect.x+player.rect.width)
+        # print('y_sol_1', player.rect.y,player.pos.y, player.vel.y)
+        
+        
         f=0
         for tile in self.tiles.sprites():
+            # print(tile.__class__)
+
             # print(tile.rect.top, end=' ')
             if tile.rect.colliderect(player.rect):
-                f=1
-                # print()
                 # print('c')
                 if player.vel.y<0:
                     player.pos.y = tile.rect.bottom 
@@ -166,16 +205,32 @@ class Level:
                     player.pos.y = tile.rect.top - player.rect.height
                     player.rect.y = int(player.pos.y)
                     player.coords.y = tile.coords.y - player.rect.height
-                    # print(player.rect.y, player.pos.y, tile.rect.top)
+                    # print('after c', player.rect.y, tile.rect.top)
                     player.vel.y = 0
                     player.on_ground = True
                     player.jumped=False
+                    if tile.__class__==H_Moving_Platform:
+                        f=1
+                        player.on_h_platform=True
+                        self.hp_speed=tile.vel.x
+                    else:
+                        self.hp_speed=0
+
+                else:
+                    if player.on_h_platform:
+                        f=1
+
+        if f==0 and player.on_h_platform:
+            player.vel.x+=self.hp_speed
+            player.on_h_platform=False
+
+        print(player.vel.x)
 
 
         if player.on_ground and (player.vel.y>1 or player.vel.y<0):
             player.on_ground = False
 
-        # print(player.on_ground)
+        # print('og',player.on_ground)
 
         # print()
         
