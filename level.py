@@ -15,6 +15,7 @@ class Level:
         self.start_ypos=0
         self.hp_speed=0
         self.prev_hp_speed=0
+        self.time=0
     
     def setup_level(self, layout ):
         self.tiles = pygame.sprite.Group()
@@ -23,6 +24,8 @@ class Level:
         self.player = pygame.sprite.GroupSingle()
         self.enemy = pygame.sprite.GroupSingle()
         self.h_moving_platforms=pygame.sprite.Group()
+        self.canons=pygame.sprite.Group()
+        self.bullets=pygame.sprite.Group()
         for row_index,row in enumerate(layout):
             for col_index, cell in enumerate(row):
                 x=tile_size*col_index
@@ -37,6 +40,10 @@ class Level:
                     p=H_Moving_Platform((x, y), tile_size)
                     self.tiles.add(p)
                     self.h_moving_platforms.add(p)
+                elif cell == 'C':
+                    c=Canon((x, y), tile_size)
+                    self.tiles.add(c)
+                    self.canons.add(c)
 
     def scroll_x(self):
         self.shift_x = 0
@@ -128,31 +135,36 @@ class Level:
             p.move()
         self.tiles.update(self.shift_x, 0)
 
-        for p in self.h_moving_platforms:
-            print('pv', p.vel.x)
+        # for p in self.h_moving_platforms:
+        #     print('pv', p.vel.x)
         
         # print('x_sol', player.rect.x+player.rect.width, player.rect.y)
         for tile in self.tiles.sprites():
             # print(tile.rect.top, end=' ')
             if tile.rect.colliderect(player.rect):
                 f=1
+
                 # print('c')
                 # print('cx', tile.rect.top, player.rect.top)
                 vel=player.vel.x-tile.vel.x
-                if vel<0:
-                    player.pos.x = tile.rect.right
-                    player.touching_wall_l=True
-                    player.coords.x = tile.coords.x+tile_size
-                    player.rect.x = int(player.pos.x)
-                    player.vel.x=0
 
-                elif vel>0:
-                    player.pos.x = tile.rect.left - player.rect.width
-                    player.touching_wall_r=True
-                    player.rect.x = int(player.pos.x)
-                    player.coords.x = tile.coords.x - player.rect.width
-                    # print(player.pos.x, player.rect.x)
-                    player.vel.x = 0
+                if tile.__class__==Bullet:
+                    player.dead=True
+                else:
+                    if vel<0:
+                        player.pos.x = tile.rect.right
+                        player.touching_wall_l=True
+                        player.coords.x = tile.coords.x+tile_size
+                        player.rect.x = int(player.pos.x)
+                        player.vel.x=0
+
+                    elif vel>0:
+                        player.pos.x = tile.rect.left - player.rect.width
+                        player.touching_wall_r=True
+                        player.rect.x = int(player.pos.x)
+                        player.coords.x = tile.coords.x - player.rect.width
+                        # print(player.pos.x, player.rect.x)
+                        player.vel.x = 0
 
         
         if player.status=='wall_slide' and f==0:
@@ -167,7 +179,8 @@ class Level:
             elif player.touching_wall_r:
                 player.touching_wall_r=False
 
-        # print('b', player.vel.x)
+        # print(player.dead)
+
     def y_collisions(self):
 
         player = self.player.sprite
@@ -224,7 +237,7 @@ class Level:
             player.vel.x+=self.hp_speed
             player.on_h_platform=False
 
-        print(player.vel.x)
+        # print(player.vel.x)
 
 
         if player.on_ground and (player.vel.y>1 or player.vel.y<0):
@@ -243,7 +256,19 @@ class Level:
         
 
 
-        
+    def shoot_canon(self):
+        for canon in self.canons:
+            if self.time%canon.freq==0:
+                bullet=Bullet((canon.rect.x, canon.rect.y+20), 30)
+                self.bullets.add(bullet)
+                self.tiles.add(bullet)
+
+    def handle_bullets(self):
+        for b in self.bullets.sprites():
+            b.move()
+            if b.coords.x < 0 or b.coords.x>level_width:
+                pygame.sprite.Sprite.kill(b)
+
 
     def run(self):
         player=self.player.sprite
@@ -253,11 +278,15 @@ class Level:
         
         
         
-        
         # print(self.shift_x, player.vel.x)
         
         # self.tiles.update(self.shift_x, self.shift_y)
         self.tiles.draw(self.display_surface)
+
+        self.shoot_canon()
+        self.handle_bullets()
+        # self.bullets.update()
+        self.bullets.draw(self.display_surface)
 
         self.player.update()
         self.scroll_x()
@@ -271,6 +300,8 @@ class Level:
         self.player.draw(self.display_surface)
         if player.sliding:
             player.rect.y-=25
+
+        self.time+=1
 
         
 

@@ -8,7 +8,7 @@ level_map = [
 '                              ',
 '                              ',
 '                              ',
-'         XP       H           ',
+'         XP       C           ',
 '         XXXXXXXXXXXXXXXXXX   ',
 '                              ',
 '                              ',

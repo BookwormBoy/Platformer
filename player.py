@@ -32,14 +32,15 @@ class Player(pygame.sprite.Sprite):
         self.jump_cancelled=False
         self.stationary_x=True
         self.on_h_platform=True
+        self.dead=False
 
     def import_character_assets(self):
         character_path='./graphics/character/'
-        self.animations={'idle':[], 'walk':[], 'jump':[], 'fall':[], 'wall_slide':[], 'run':[], 'slide':[]}
-        cx={'idle':14, 'jump':17, 'walk':21, 'fall':17, 'wall_slide':15, 'run': 17, 'slide':9}
-        cy={'idle':6, 'jump':7, 'walk':7, 'fall':1, 'wall_slide':3, 'run':7, 'slide':19}
-        w={'idle':19, 'jump':19, 'walk':19, 'fall':19, 'wall_slide':19, 'run': 19, 'slide':31}
-        h={'idle':30, 'jump':30, 'walk':30, 'fall':30, 'wall_slide':30, 'run': 30, 'slide':18}
+        self.animations={'idle':[], 'walk':[], 'jump':[], 'fall':[], 'wall_slide':[], 'run':[], 'slide':[], 'dead':[]}
+        cx={'idle':14, 'jump':17, 'walk':21, 'fall':17, 'wall_slide':15, 'run': 17, 'slide':9, 'dead':4}
+        cy={'idle':6, 'jump':7, 'walk':7, 'fall':1, 'wall_slide':3, 'run':7, 'slide':19, 'dead':7}
+        w={'idle':19, 'jump':19, 'walk':19, 'fall':19, 'wall_slide':19, 'run': 19, 'slide':31, 'dead':29}
+        h={'idle':30, 'jump':30, 'walk':30, 'fall':30, 'wall_slide':30, 'run': 30, 'slide':18, 'dead':29}
 
 
         for animation in self.animations.keys():
@@ -48,6 +49,9 @@ class Player(pygame.sprite.Sprite):
 
     def get_input(self):
         keys = pygame.key.get_pressed()
+
+        if self.dead:
+            return
 
         if self.on_ground:
             self.jump_cancelled=False
@@ -184,6 +188,10 @@ class Player(pygame.sprite.Sprite):
 
         keys = pygame.key.get_pressed()
 
+        if self.dead:
+            self.status='dead'
+            return
+
         if self.on_ground:
             if self.touching_wall_l or self.touching_wall_r:
                 self.status='idle'
@@ -227,7 +235,7 @@ class Player(pygame.sprite.Sprite):
 
         self.frame_index+=self.animation_speed
         if self.frame_index >= len(animation):
-            if(self.status=='jump'):
+            if(self.status=='jump' or self.status=='dead'):
                 self.frame_index=len(animation)-1
             else:
                 self.frame_index=0
