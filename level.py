@@ -45,6 +45,7 @@ class Level:
                     self.tiles.add(c)
                     self.canons.add(c)
 
+
     def scroll_x(self):
         self.shift_x = 0
 
@@ -100,7 +101,9 @@ class Level:
         # print(self.start_ypos)
 
     def x_collisions(self):
+        
         player = self.player.sprite
+        # print('pxcol', player.vel.x, end=' ')
         # print(player.on_h_platform)
         # if player.on_h_platform:
         #     print(player.vel.x, self.hp_speed, self.prev_hp_speed)
@@ -131,8 +134,15 @@ class Level:
             player.pos.x+=self.hp_speed
             player.coords.x+=self.hp_speed
         player.rect.x = int(player.pos.x)
-        for p in self.h_moving_platforms:
+
+        for p in self.h_moving_platforms: #horizontal moving platforms
             p.move()
+
+        for b in self.bullets.sprites(): #bullets
+            b.move_x()
+            if b.coords.x < 0 or b.coords.x>level_width or b.coords.y<0 or b.coords.y>level_height:
+                pygame.sprite.Sprite.kill(b)
+
         self.tiles.update(self.shift_x, 0)
 
         # for p in self.h_moving_platforms:
@@ -144,12 +154,13 @@ class Level:
             if tile.rect.colliderect(player.rect):
                 f=1
 
-                # print('c')
                 # print('cx', tile.rect.top, player.rect.top)
                 vel=player.vel.x-tile.vel.x
 
                 if tile.__class__==Bullet:
-                    player.dead=True
+                    if not tile.bounced_on:
+                        print('cx', tile.rect.x, player.rect.x, tile.rect.y, player.rect.y)
+                        player.dead=True
                 else:
                     if vel<0:
                         player.pos.x = tile.rect.right
@@ -179,9 +190,11 @@ class Level:
             elif player.touching_wall_r:
                 player.touching_wall_r=False
 
-        # print(player.dead)
+        # print('xcol', player.vel.x, end=' ')
 
     def y_collisions(self):
+
+        keys=pygame.key.get_pressed()
 
         player = self.player.sprite
         player.acc.y = 1
@@ -193,6 +206,10 @@ class Level:
         player.pos.y += player.vel.y
         player.coords.y += player.vel.y
         player.rect.y = int(player.pos.y)
+
+        for b in self.bullets.sprites():
+            b.move_y()
+
         self.tiles.update(0, self.shift_y)
        
         # print(player.vel.y)
@@ -213,21 +230,32 @@ class Level:
                     player.coords.y = tile.coords.y + tile_size
                     # print(player.rect.y, player.pos.y, tile.rect.bottom)
                     player.vel.y=0
+                    if tile.__class__==Bullet and not tile.bounced_on:
+                        player.dead=True
 
                 elif player.vel.y>0:
-                    player.pos.y = tile.rect.top - player.rect.height
-                    player.rect.y = int(player.pos.y)
-                    player.coords.y = tile.coords.y - player.rect.height
-                    # print('after c', player.rect.y, tile.rect.top)
-                    player.vel.y = 0
-                    player.on_ground = True
-                    player.jumped=False
-                    if tile.__class__==H_Moving_Platform:
-                        f=1
-                        player.on_h_platform=True
-                        self.hp_speed=tile.vel.x
+                    if tile.__class__==Bullet:
+                        if not tile.bounced_on:
+                            player.pos.y = tile.rect.top - player.rect.height
+                            tile.bounced_on=True
+                            if keys[pygame.K_d]:
+                                player.vel.y=-15
+                            else:
+                                player.vel.y=-10
                     else:
-                        self.hp_speed=0
+                        player.pos.y = tile.rect.top - player.rect.height
+                        player.rect.y = int(player.pos.y)
+                        player.coords.y = tile.coords.y - player.rect.height
+                        # print('after c', player.rect.y, tile.rect.top)
+                        player.vel.y = 0
+                        player.on_ground = True
+                        player.jumped=False
+                        if tile.__class__==H_Moving_Platform:
+                            f=1
+                            player.on_h_platform=True
+                            self.hp_speed=tile.vel.x
+                        else:
+                            self.hp_speed=0
 
                 else:
                     if player.on_h_platform:
@@ -237,7 +265,7 @@ class Level:
             player.vel.x+=self.hp_speed
             player.on_h_platform=False
 
-        # print(player.vel.x)
+        # print('ycol', player.vel)
 
 
         if player.on_ground and (player.vel.y>1 or player.vel.y<0):
@@ -259,16 +287,11 @@ class Level:
     def shoot_canon(self):
         for canon in self.canons:
             if self.time%canon.freq==0:
-                bullet=Bullet((canon.rect.x, canon.rect.y+20), 30)
+                bullet=Bullet((canon.rect.x, canon.rect.y-10), 30)
                 self.bullets.add(bullet)
                 self.tiles.add(bullet)
 
-    def handle_bullets(self):
-        for b in self.bullets.sprites():
-            b.move()
-            if b.coords.x < 0 or b.coords.x>level_width:
-                pygame.sprite.Sprite.kill(b)
-
+  
 
     def run(self):
         player=self.player.sprite
@@ -284,7 +307,7 @@ class Level:
         self.tiles.draw(self.display_surface)
 
         self.shoot_canon()
-        self.handle_bullets()
+        # self.handle_bullets()
         # self.bullets.update()
         self.bullets.draw(self.display_surface)
 

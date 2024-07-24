@@ -138,6 +138,11 @@ class Player(pygame.sprite.Sprite):
                     if not self.jump_cancelled:
                         self.facing_right=True
                         self.jump_cancelled=True
+            else:
+                if keys[pygame.K_RIGHT]:
+                    self.vel.x=2
+                elif keys[pygame.K_LEFT]:
+                    self.vel.x=-2
 
 
         if not self.on_ground:
@@ -166,16 +171,16 @@ class Player(pygame.sprite.Sprite):
         else:
             self.stationary_x=False
 
-        if keys[pygame.K_c] and self.on_ground: #jump
+        if keys[pygame.K_d] and self.on_ground: #jump
             self.jumped=True
             self.vel.y = -17
 
-        if keys[pygame.K_c] and self.jumped:
+        if keys[pygame.K_d] and self.jumped:
             self.slow_jump=True
         else:
             self.slow_jump=False
 
-        if keys[pygame.K_c] and self.status=='wall_slide':
+        if keys[pygame.K_d] and self.status=='wall_slide':
             self.vel.y-=25
             if self.touching_wall_r:
                 self.vel.x-=15

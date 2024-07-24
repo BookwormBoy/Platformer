@@ -54,9 +54,19 @@ class Bullet(Tile):
         self.image.fill('green')
         self.rect=self.image.get_rect(topleft=pos)
 
-        
+        self.bounced_on=False
 
-    def move(self):
+    def move_x(self):
         self.pos.x-=2
         self.coords.x-=2
         self.rect.x = int(self.pos.x)
+
+    def move_y(self):
+
+        if self.bounced_on:
+            self.acc.y=0.2
+
+        self.vel.y+=self.acc.y
+        self.pos.y+=self.vel.y
+        self.coords.y+=self.vel.y
+        self.rect.y=int(self.pos.y)
