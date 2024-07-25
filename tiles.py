@@ -70,3 +70,38 @@ class Bullet(Tile):
         self.pos.y+=self.vel.y
         self.coords.y+=self.vel.y
         self.rect.y=int(self.pos.y)
+
+class On_Off_Switch(Tile):
+    def __init__(self, pos, size):
+        super().__init__(pos, size)
+        self.image.fill('purple')
+
+    def change_sprite(self, on):
+        if on:
+            self.image.fill('purple')
+        else:
+            self.image.fill('blue')
+            print('w')
+
+class On_Block(Tile):
+    def __init__(self, pos, size):
+        super().__init__(pos, size)
+        self.image.fill('purple')
+
+    def change_sprite(self, on):
+        if on:
+            self.image.fill('purple')
+        else:
+            self.image.fill('pink')
+
+class Off_Block(Tile):
+    def __init__(self, pos, size):
+        super().__init__(pos, size)
+        self.image.fill('light blue')
+
+    def change_sprite(self, on):
+        if on:
+            self.image.fill('light blue')
+        else:
+            self.image.fill('blue')
+

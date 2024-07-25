@@ -16,6 +16,7 @@ class Level:
         self.hp_speed=0
         self.prev_hp_speed=0
         self.time=0
+        self.on=True
     
     def setup_level(self, layout ):
         self.tiles = pygame.sprite.Group()
@@ -26,6 +27,9 @@ class Level:
         self.h_moving_platforms=pygame.sprite.Group()
         self.canons=pygame.sprite.Group()
         self.bullets=pygame.sprite.Group()
+        self.on_off_switches=pygame.sprite.Group()
+        self.on_blocks=pygame.sprite.Group()
+        self.off_blocks=pygame.sprite.Group()
         for row_index,row in enumerate(layout):
             for col_index, cell in enumerate(row):
                 x=tile_size*col_index
@@ -44,6 +48,18 @@ class Level:
                     c=Canon((x, y), tile_size)
                     self.tiles.add(c)
                     self.canons.add(c)
+                elif cell == 'S':
+                    tile=On_Off_Switch((x, y), tile_size)
+                    self.tiles.add(tile)
+                    self.on_off_switches.add(tile)
+                elif cell == 'N':
+                    tile=On_Block((x, y), tile_size)
+                    self.tiles.add(tile)
+                    self.on_blocks.add(tile)
+                elif cell == 'F':
+                    tile=Off_Block((x, y), tile_size)
+                    self.tiles.add(tile)
+                    self.off_blocks.add(tile)
 
 
     def scroll_x(self):
@@ -126,10 +142,9 @@ class Level:
             elif player.touching_wall_l:
                 player.vel.x-=1
 
-        
-
         player.pos.x += player.vel.x
         player.coords.x += player.vel.x
+
         if player.on_h_platform:
             player.pos.x+=self.hp_speed
             player.coords.x+=self.hp_speed
@@ -162,20 +177,23 @@ class Level:
                         print('cx', tile.rect.x, player.rect.x, tile.rect.y, player.rect.y)
                         player.dead=True
                 else:
-                    if vel<0:
-                        player.pos.x = tile.rect.right
-                        player.touching_wall_l=True
-                        player.coords.x = tile.coords.x+tile_size
-                        player.rect.x = int(player.pos.x)
-                        player.vel.x=0
+                    if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True):
+                        pass
+                    else:
+                        if vel<0:
+                            player.pos.x = tile.rect.right
+                            player.touching_wall_l=True
+                            player.coords.x = tile.coords.x+tile_size
+                            player.rect.x = int(player.pos.x)
+                            player.vel.x=0
 
-                    elif vel>0:
-                        player.pos.x = tile.rect.left - player.rect.width
-                        player.touching_wall_r=True
-                        player.rect.x = int(player.pos.x)
-                        player.coords.x = tile.coords.x - player.rect.width
-                        # print(player.pos.x, player.rect.x)
-                        player.vel.x = 0
+                        elif vel>0:
+                            player.pos.x = tile.rect.left - player.rect.width
+                            player.touching_wall_r=True
+                            player.rect.x = int(player.pos.x)
+                            player.coords.x = tile.coords.x - player.rect.width
+                            # print(player.pos.x, player.rect.x)
+                            player.vel.x = 0
 
         
         if player.status=='wall_slide' and f==0:
@@ -223,43 +241,50 @@ class Level:
 
             # print(tile.rect.top, end=' ')
             if tile.rect.colliderect(player.rect):
+
+                if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True):
+                        pass
                 # print('c')
-                if player.vel.y<0:
-                    player.pos.y = tile.rect.bottom 
-                    player.rect.y = int(player.pos.y)
-                    player.coords.y = tile.coords.y + tile_size
-                    # print(player.rect.y, player.pos.y, tile.rect.bottom)
-                    player.vel.y=0
-                    if tile.__class__==Bullet and not tile.bounced_on:
-                        player.dead=True
-
-                elif player.vel.y>0:
-                    if tile.__class__==Bullet:
-                        if not tile.bounced_on:
-                            player.pos.y = tile.rect.top - player.rect.height
-                            tile.bounced_on=True
-                            if keys[pygame.K_d]:
-                                player.vel.y=-15
-                            else:
-                                player.vel.y=-10
-                    else:
-                        player.pos.y = tile.rect.top - player.rect.height
-                        player.rect.y = int(player.pos.y)
-                        player.coords.y = tile.coords.y - player.rect.height
-                        # print('after c', player.rect.y, tile.rect.top)
-                        player.vel.y = 0
-                        player.on_ground = True
-                        player.jumped=False
-                        if tile.__class__==H_Moving_Platform:
-                            f=1
-                            player.on_h_platform=True
-                            self.hp_speed=tile.vel.x
-                        else:
-                            self.hp_speed=0
-
                 else:
-                    if player.on_h_platform:
-                        f=1
+                    if player.vel.y<0:
+                        player.pos.y = tile.rect.bottom 
+                        player.rect.y = int(player.pos.y)
+                        player.coords.y = tile.coords.y + tile_size
+                        # print(player.rect.y, player.pos.y, tile.rect.bottom)
+                        player.vel.y=0
+                        if tile.__class__==Bullet and not tile.bounced_on:
+                            player.dead=True
+                        
+                        if tile.__class__==On_Off_Switch:
+                            self.on= not self.on
+
+                    elif player.vel.y>0:
+                        if tile.__class__==Bullet:
+                            if not tile.bounced_on:
+                                player.pos.y = tile.rect.top - player.rect.height
+                                tile.bounced_on=True
+                                if keys[pygame.K_d]:
+                                    player.vel.y=-15
+                                else:
+                                    player.vel.y=-10
+                        else:
+                            player.pos.y = tile.rect.top - player.rect.height
+                            player.rect.y = int(player.pos.y)
+                            player.coords.y = tile.coords.y - player.rect.height
+                            # print('after c', player.rect.y, tile.rect.top)
+                            player.vel.y = 0
+                            player.on_ground = True
+                            player.jumped=False
+                            if tile.__class__==H_Moving_Platform:
+                                f=1
+                                player.on_h_platform=True
+                                self.hp_speed=tile.vel.x
+                            else:
+                                self.hp_speed=0
+
+                    else:
+                        if player.on_h_platform:
+                            f=1
 
         if f==0 and player.on_h_platform:
             player.vel.x+=self.hp_speed
@@ -281,6 +306,8 @@ class Level:
 
 
         # print(player.rect.y, player.pos.y)
+            
+        # print(self.on)
         
 
 
@@ -302,7 +329,12 @@ class Level:
         
         
         # print(self.shift_x, player.vel.x)
-        
+        for tile in self.on_off_switches.sprites():
+            tile.change_sprite(self.on)
+        for tile in self.on_blocks.sprites():
+            tile.change_sprite(self.on)
+        for tile in self.off_blocks.sprites():
+            tile.change_sprite(self.on)
         # self.tiles.update(self.shift_x, self.shift_y)
         self.tiles.draw(self.display_surface)
 
