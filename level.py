@@ -30,6 +30,7 @@ class Level:
         self.on_off_switches=pygame.sprite.Group()
         self.on_blocks=pygame.sprite.Group()
         self.off_blocks=pygame.sprite.Group()
+        self.shells=pygame.sprite.Group()
         for row_index,row in enumerate(layout):
             for col_index, cell in enumerate(row):
                 x=tile_size*col_index
@@ -60,6 +61,9 @@ class Level:
                     tile=Off_Block((x, y), tile_size)
                     self.tiles.add(tile)
                     self.off_blocks.add(tile)
+                elif cell == 'L':
+                    tile=Shell((x, y))
+                    self.shells.add(tile)
 
 
     def scroll_x(self):
@@ -158,6 +162,9 @@ class Level:
             if b.coords.x < 0 or b.coords.x>level_width or b.coords.y<0 or b.coords.y>level_height:
                 pygame.sprite.Sprite.kill(b)
 
+        for shell in self.shells.sprites():
+            shell.move_x(self.shift_x)
+
         self.tiles.update(self.shift_x, 0)
 
         # for p in self.h_moving_platforms:
@@ -195,6 +202,38 @@ class Level:
                             # print(player.pos.x, player.rect.x)
                             player.vel.x = 0
 
+            for shell in self.shells.sprites(): #shell-tile collision
+                if tile.rect.colliderect(shell.rect):
+                    vel = shell.vel.x - tile.vel.x
+                    if tile.__class__==On_Off_Switch:
+                        self.on=not self.on
+                    if vel<0:
+                        shell.pos.x = tile.rect.right
+                        shell.coords.x = tile.coords.x+tile_size
+                        shell.rect.x = int(shell.pos.x)
+                        shell.vel.x=-shell.vel.x
+
+                    elif vel>0:
+                        shell.pos.x = tile.rect.left - shell.rect.width
+                        shell.rect.x = int(shell.pos.x)
+                        shell.coords.x = tile.coords.x - shell.rect.width
+                        shell.vel.x = -shell.vel.x
+                    
+
+        #player-shell collisions
+        
+        for shell in self.shells.sprites():
+            if shell.rect.colliderect(player.rect):
+                if shell.kicked:
+                    player.dead=True
+                else:
+                    if player.vel.x>0:
+                        shell.vel.x=8.1
+                        shell.kicked=True
+                    elif player.vel.x<0:
+                        shell.vel.x=-8.1
+                        shell.kicked=True
+
         
         if player.status=='wall_slide' and f==0:
             if player.touching_wall_l:
@@ -227,6 +266,9 @@ class Level:
 
         for b in self.bullets.sprites():
             b.move_y()
+
+        for shell in self.shells.sprites():
+            shell.move_y(self.shift_y)
 
         self.tiles.update(0, self.shift_y)
        
@@ -286,6 +328,21 @@ class Level:
                         if player.on_h_platform:
                             f=1
 
+            for shell in self.shells.sprites():
+                if tile.rect.colliderect(shell.rect):
+                    if shell.vel.y<0:
+                        shell.pos.y = tile.rect.bottom 
+                        shell.rect.y = int(shell.pos.y)
+                        shell.coords.y = tile.coords.y + tile_size
+                        shell.vel.y=0
+                    elif shell.vel.y>0:
+                        shell.pos.y = tile.rect.top - shell.rect.height
+                        shell.rect.y = int(shell.pos.y)
+                        shell.coords.y = tile.coords.y - shell.rect.height
+                        shell.vel.y = 0
+
+
+
         if f==0 and player.on_h_platform:
             player.vel.x+=self.hp_speed
             player.on_h_platform=False
@@ -342,6 +399,7 @@ class Level:
         # self.handle_bullets()
         # self.bullets.update()
         self.bullets.draw(self.display_surface)
+        self.shells.draw(self.display_surface)
 
         self.player.update()
         self.scroll_x()
