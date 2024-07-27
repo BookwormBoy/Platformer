@@ -117,19 +117,31 @@ class Shell(pygame.sprite.Sprite):
         self.acc = pygame.math.Vector2(0,0.6)
 
         self.kicked=False
+        self.held=False
 
-    def move_x(self, shift):
+    def move_x(self, shift, player_x, player_coords):
         self.vel.x+=self.acc.x
-        self.pos.x+=shift
-        self.pos.x+=self.vel.x
-        self.coords.x+=self.vel.x
+
+        if self.held:
+            self.pos.x=player_x
+            self.coords.x=player_coords
+        else:
+            self.pos.x+=shift
+            self.pos.x+=self.vel.x
+            self.coords.x+=self.vel.x
         self.rect.x=int(self.pos.x)
 
-    def move_y(self, shift):
+
+    def move_y(self, shift, player_y, player_coords):
         self.vel.y+=self.acc.y
-        self.pos.y+=shift
-        self.pos.y+=self.vel.y
-        self.coords.y+=self.vel.y
+
+        if self.held:
+            self.pos.y=player_y
+            self.coords.y=player_coords
+        else:
+            self.pos.y+=shift
+            self.pos.y+=self.vel.y
+            self.coords.y+=self.vel.y
         self.rect.y=int(self.pos.y)
 
 

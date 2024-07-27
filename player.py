@@ -33,6 +33,7 @@ class Player(pygame.sprite.Sprite):
         self.stationary_x=True
         self.on_h_platform=True
         self.dead=False
+        self.holding_shell=False
 
     def import_character_assets(self):
         character_path='./graphics/character/'

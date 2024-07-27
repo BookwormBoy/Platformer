@@ -17,6 +17,11 @@ class Level:
         self.prev_hp_speed=0
         self.time=0
         self.on=True
+        self.shell_thrown=0
+        self.shell_kicked=0
+        self.shell_stopped=0
+        self.thrown_up=0
+        self.shell_regrab=0
     
     def setup_level(self, layout ):
         self.tiles = pygame.sprite.Group()
@@ -163,7 +168,7 @@ class Level:
                 pygame.sprite.Sprite.kill(b)
 
         for shell in self.shells.sprites():
-            shell.move_x(self.shift_x)
+            shell.move_x(self.shift_x, player.rect.x, player.coords.x)
 
         self.tiles.update(self.shift_x, 0)
 
@@ -181,7 +186,7 @@ class Level:
 
                 if tile.__class__==Bullet:
                     if not tile.bounced_on:
-                        print('cx', tile.rect.x, player.rect.x, tile.rect.y, player.rect.y)
+                        # print('cx', tile.rect.x, player.rect.x, tile.rect.y, player.rect.y)
                         player.dead=True
                 else:
                     if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True):
@@ -204,35 +209,63 @@ class Level:
 
             for shell in self.shells.sprites(): #shell-tile collision
                 if tile.rect.colliderect(shell.rect):
-                    vel = shell.vel.x - tile.vel.x
-                    if tile.__class__==On_Off_Switch:
-                        self.on=not self.on
-                    if vel<0:
-                        shell.pos.x = tile.rect.right
-                        shell.coords.x = tile.coords.x+tile_size
-                        shell.rect.x = int(shell.pos.x)
-                        shell.vel.x=-shell.vel.x
+                    if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True):
+                        pass
+                    else:
+                        if shell.held:
+                            pygame.sprite.Sprite.kill(shell)
+                            player.holding_shell=False
+                        else:
+                            vel = shell.vel.x - tile.vel.x
+                            if tile.__class__==On_Off_Switch:
+                                self.on=not self.on
+                            if vel<0:
+                                shell.pos.x = tile.rect.right
+                                shell.coords.x = tile.coords.x+tile_size
+                                shell.rect.x = int(shell.pos.x)
+                                shell.vel.x=-shell.vel.x
 
-                    elif vel>0:
-                        shell.pos.x = tile.rect.left - shell.rect.width
-                        shell.rect.x = int(shell.pos.x)
-                        shell.coords.x = tile.coords.x - shell.rect.width
-                        shell.vel.x = -shell.vel.x
-                    
+                            elif vel>0:
+                                shell.pos.x = tile.rect.left - shell.rect.width
+                                shell.rect.x = int(shell.pos.x)
+                                shell.coords.x = tile.coords.x - shell.rect.width
+                                shell.vel.x = -shell.vel.x
+                        
 
         #player-shell collisions
+
+        keys=pygame.key.get_pressed()
         
         for shell in self.shells.sprites():
-            if shell.rect.colliderect(player.rect):
+            if shell.rect.colliderect(player.rect) and not player.dead:
                 if shell.kicked:
-                    player.dead=True
+                    t=pygame.time.get_ticks()
+                    if(t-self.shell_thrown>100) and (t-self.shell_kicked>100) and (t-self.thrown_up>100) and (t-self.shell_regrab)>100:
+                        player.dead=True
                 else:
-                    if player.vel.x>0:
-                        shell.vel.x=8.1
-                        shell.kicked=True
-                    elif player.vel.x<0:
-                        shell.vel.x=-8.1
-                        shell.kicked=True
+                    if keys[pygame.K_LSHIFT] and not player.holding_shell:
+                        shell.held=True
+                        player.holding_shell=True
+                    else:
+                        t=pygame.time.get_ticks()
+                        if t-self.thrown_up>100:
+                            if player.vel.x>0:
+                                shell.vel.x=12
+                                shell.kicked=True
+                                self.shell_kicked=pygame.time.get_ticks()
+                                player.pos.x = shell.rect.left - player.rect.width
+                                player.rect.x = int(player.pos.x)
+                                player.coords.x = shell.coords.x - player.rect.width
+                            elif player.vel.x<0:
+                                shell.vel.x=-12
+                                shell.kicked=True
+                                self.shell_kicked=pygame.time.get_ticks()
+                                player.pos.x = shell.rect.right
+                                player.coords.x = shell.coords.x+shell.rect.width
+                                player.rect.x = int(player.pos.x)
+            # print(player.vel.x, shell.vel.x)
+
+        
 
         
         if player.status=='wall_slide' and f==0:
@@ -268,7 +301,7 @@ class Level:
             b.move_y()
 
         for shell in self.shells.sprites():
-            shell.move_y(self.shift_y)
+            shell.move_y(self.shift_y, player.pos.y-31, player.coords.y-31)
 
         self.tiles.update(0, self.shift_y)
        
@@ -329,17 +362,63 @@ class Level:
                             f=1
 
             for shell in self.shells.sprites():
-                if tile.rect.colliderect(shell.rect):
-                    if shell.vel.y<0:
-                        shell.pos.y = tile.rect.bottom 
-                        shell.rect.y = int(shell.pos.y)
-                        shell.coords.y = tile.coords.y + tile_size
-                        shell.vel.y=0
-                    elif shell.vel.y>0:
-                        shell.pos.y = tile.rect.top - shell.rect.height
-                        shell.rect.y = int(shell.pos.y)
-                        shell.coords.y = tile.coords.y - shell.rect.height
-                        shell.vel.y = 0
+                if tile.rect.colliderect(shell.rect): #shell-tile collision
+                    if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True):
+                        pass
+                    else:
+                        if shell.held:
+                            pygame.sprite.Sprite.kill(shell)
+                            player.holding_shell=False
+                        else:
+                            if shell.vel.y<0:
+                                shell.pos.y = tile.rect.bottom 
+                                shell.rect.y = int(shell.pos.y)
+                                shell.coords.y = tile.coords.y + tile_size
+                                shell.vel.y=0
+                            elif shell.vel.y>0:
+                                shell.pos.y = tile.rect.top - shell.rect.height
+                                shell.rect.y = int(shell.pos.y)
+                                shell.coords.y = tile.coords.y - shell.rect.height
+                                shell.vel.y = 0
+
+        #player-shell collision
+
+        for shell in self.shells.sprites():
+            if shell.rect.colliderect(player.rect) and not shell.held and not player.dead:
+                if shell.rect.y>player.rect.y:
+                    player.pos.y = shell.rect.top - player.rect.height
+                    t=pygame.time.get_ticks()
+                    if shell.kicked and t-self.shell_kicked>100:
+                        shell.kicked=False
+                        if keys[pygame.K_d]:
+                            player.vel.y=-15
+                        else:
+                            player.vel.y=-10
+                        shell.vel.x=0
+                        player.pos.y-=2
+                        player.coords.y-=2
+                        player.rect.y=int(player.pos.y)
+                        self.shell_stopped=pygame.time.get_ticks()
+                        # print('stop', self.shell_stopped)
+                    else:
+                        t=pygame.time.get_ticks()
+                        # print(t, self.shell_stopped)
+                        if t-self.shell_stopped>100:
+                            if player.rect.centerx<=shell.rect.centerx:
+                                shell.vel.x=12
+                            else:
+                                shell.vel.x=-12
+                            shell.kicked=True
+                            self.shell_kicked=pygame.time.get_ticks()
+                else:
+                    if not player.holding_shell:
+                        shell.held=True
+                        player.holding_shell=True
+                        self.shell_regrab=pygame.time.get_ticks()
+                        shell.pos.y=player.pos.y-31
+                        shell.coords.y=player.coords.y-31
+                        shell.rect.y=int(shell.rect.y)
+                    # print('regrab')
 
 
 
@@ -375,6 +454,34 @@ class Level:
                 self.bullets.add(bullet)
                 self.tiles.add(bullet)
 
+    def handle_shells(self):
+        keys=pygame.key.get_pressed()
+        player=self.player.sprite
+        
+        for shell in self.shells.sprites():
+            if shell.coords.y>level_height:
+                pygame.sprite.Sprite.kill(shell)
+            
+            if shell.held and not keys[pygame.K_LSHIFT]:
+                shell.held=False
+                player.holding_shell=False
+                if keys[pygame.K_UP]:
+                    print('thrown')
+                    shell.vel.y=-20
+                    shell.vel.x=player.vel.x
+                    self.thrown_up=pygame.time.get_ticks()
+                    shell.kicked=True
+                else:
+                    if player.facing_right:
+                        shell.vel.x=12
+                    else:
+                        shell.vel.x=-12
+                    shell.vel.y=-5
+                    shell.kicked=True
+                    self.shell_thrown=pygame.time.get_ticks()
+
+            # print(shell.held, shell.vel, shell.kicked)
+
   
 
     def run(self):
@@ -398,6 +505,7 @@ class Level:
         self.shoot_canon()
         # self.handle_bullets()
         # self.bullets.update()
+        self.handle_shells()
         self.bullets.draw(self.display_surface)
         self.shells.draw(self.display_surface)
 
