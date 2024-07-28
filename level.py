@@ -22,6 +22,8 @@ class Level:
         self.shell_stopped=0
         self.thrown_up=0
         self.shell_regrab=0
+        self.paused=False
+        self.pause_start=0
     
     def setup_level(self, layout ):
         self.tiles = pygame.sprite.Group()
@@ -395,7 +397,6 @@ class Level:
                         if player.on_h_platform:
                             f=1
                         if player.on_fp:
-                            print('here')
                             player.pos.y = tile.rect.top - player.rect.height
                             player.rect.y = int(player.pos.y)
                             player.coords.y = tile.coords.y - player.rect.height
@@ -536,42 +537,44 @@ class Level:
     def run(self):
         player=self.player.sprite
 
+        keys=pygame.key.get_pressed()
+        t=pygame.time.get_ticks()
+        if keys[pygame.K_RSHIFT] and (t-self.pause_start>500):
+            self.paused=not self.paused
+            self.pause_start=pygame.time.get_ticks()
+
          
-        
-        
-        
-        
-        # print(self.shift_x, player.vel.x)
         for tile in self.on_off_switches.sprites():
             tile.change_sprite(self.on)
         for tile in self.on_blocks.sprites():
             tile.change_sprite(self.on)
         for tile in self.off_blocks.sprites():
             tile.change_sprite(self.on)
-        # self.tiles.update(self.shift_x, self.shift_y)
+
         self.tiles.draw(self.display_surface)
 
-        self.shoot_canon()
-        # self.handle_bullets()
-        # self.bullets.update()
-        self.handle_shells()
+        if not self.paused:
+            self.shoot_canon()
+            self.handle_shells()
+
         self.bullets.draw(self.display_surface)
         self.shells.draw(self.display_surface)
 
-        self.player.update()
-        self.scroll_x()
-        self.x_collisions() 
-        self.scroll_y()
-        self.y_collisions()
-        # print(player.coords, player.pos, player.vel)
-        # print('a', player.vel)
+        if not self.paused:
+            self.player.update()
+            self.scroll_x()
+            self.x_collisions() 
+            self.scroll_y()
+            self.y_collisions()
         if player.sliding:
             player.rect.y+=25
         self.player.draw(self.display_surface)
-        if player.sliding:
-            player.rect.y-=25
 
-        self.time+=1
+        if player.sliding:
+                player.rect.y-=25
+
+        if not self.paused:
+            self.time+=1
 
         
 
