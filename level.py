@@ -24,6 +24,10 @@ class Level:
         self.shell_regrab=0
         self.paused=False
         self.pause_start=0
+        self.pshifting=False
+
+        self.right_calibration=level_width
+        self.left_calibration=0
     
     def setup_level(self, layout ):
         self.tiles = pygame.sprite.Group()
@@ -82,20 +86,40 @@ class Level:
         self.shift_x = 0
 
         player = self.player.sprite
-        player_x = player.rect.centerx
-
-        if player_x < screen_width/3 and player.vel.x<0 and player.coords.x>screen_width/3:
-            self.shift_x = -player.vel.x
-            player.pos.x += self.shift_x
-        elif player_x > 2*screen_width/3 and player.vel.x>0 and player.coords.x<level_width-screen_width/3:
-            self.shift_x = -player.vel.x 
-            player.pos.x += self.shift_x
+        
+        if player.facing_right:
+            if player.coords.x<screen_width/3 or self.right_calibration<screen_width:
+                self.shift_x=0
+                self.shift_player=False
+                self.dont_shift=False
+            elif player.pos.x>screen_width/3:
+                self.shift_x=-3*(player.vel.x)/2
+                self.shift_player=True
+                self.dont_shift=False
+            
+            else:
+                self.shift_x=-player.vel.x
+                self.dont_shift=True
+                self.shift_player=False
         else:
-            self.shift_x = 0
+            if self.left_calibration>0 or player.coords.x>level_width-screen_width/3:
+                self.shift_x=0
+                self.shift_player=False
+                self.dont_shift=False
+            elif player.pos.x<2*screen_width/3:
+                self.shift_x=-3*(player.vel.x)/2
+                self.shift_player=True
+                self.dont_shift=False
+            
+            else:
+                self.shift_x=-player.vel.x
+                self.dont_shift=True
+                self.shift_player=False
 
-       
 
         # print(player.coords.x, player.pos.x, self.shift_x)
+        self.right_calibration+=self.shift_x
+        self.left_calibration+=self.shift_x
 
     def scroll_y(self):
         self.shift_y=0
@@ -158,8 +182,15 @@ class Level:
             elif player.touching_wall_l:
                 player.vel.x-=1
 
-        player.pos.x += player.vel.x
-        player.coords.x += player.vel.x
+        # print(self.shift_player, self.dont_shift, player.coords.x, player.pos.x)
+        if self.shift_player:
+            player.pos.x -= player.vel.x/2
+        elif self.dont_shift:
+            player.pos.x+=0
+        else:
+            player.pos.x += player.vel.x
+
+        player.coords.x+=player.vel.x
 
         if player.on_h_platform:
             player.pos.x+=self.hp_speed
@@ -316,6 +347,8 @@ class Level:
         for p in self.falling_platforms.sprites():
             p.move()
             self.fp_speed=p.vel.y
+            if p.rect.y>level_height:
+                pygame.sprite.Sprite.kill(p)
 
         if player.on_fp:
             player.pos.y+=self.fp_speed+1
