@@ -157,4 +157,9 @@ class Falling_Platform(Tile):
             self.pos.y+=self.vel.y
             self.rect.y=int(self.pos.y)
 
+class Spike(Tile):
+    def __init__(self, pos, size):
+        super().__init__(pos, size)
+        self.image.fill('red')
+
 

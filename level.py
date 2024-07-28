@@ -43,6 +43,7 @@ class Level:
         self.off_blocks=pygame.sprite.Group()
         self.shells=pygame.sprite.Group()
         self.falling_platforms=pygame.sprite.Group()
+        self.spikes=pygame.sprite.Group()
         for row_index,row in enumerate(layout):
             for col_index, cell in enumerate(row):
                 x=tile_size*col_index
@@ -80,6 +81,9 @@ class Level:
                     tile = Falling_Platform((x, y), tile_size)
                     self.tiles.add(tile)
                     self.falling_platforms.add(tile)
+                elif cell == 'Y':
+                    tile=Spike((x, y), tile_size)
+                    self.tiles.add(tile)
 
 
     def scroll_x(self):
@@ -236,6 +240,8 @@ class Level:
                             player.coords.x = tile.coords.x+tile_size
                             player.rect.x = int(player.pos.x)
                             player.vel.x=0
+                            if tile.__class__==Spike:
+                                player.dead=True
 
                         elif vel>0:
                             player.pos.x = tile.rect.left - player.rect.width
@@ -244,6 +250,8 @@ class Level:
                             player.coords.x = tile.coords.x - player.rect.width
                             # print(player.pos.x, player.rect.x)
                             player.vel.x = 0
+                            if tile.__class__==Spike:
+                                player.dead=True
 
             for shell in self.shells.sprites(): #shell-tile collision
                 if tile.rect.colliderect(shell.rect):
@@ -403,6 +411,9 @@ class Level:
                         if tile.__class__==On_Off_Switch:
                             self.on= not self.on
 
+                        if tile.__class__==Spike:
+                            player.dead=True
+
                     elif player.vel.y>0:
                         if tile.__class__==Bullet:
                             if not tile.bounced_on:
@@ -419,6 +430,8 @@ class Level:
                             player.vel.y = 0
                             player.on_ground = True
                             player.jumped=False
+                            if tile.__class__==Spike:
+                                player.dead=True
                             if tile.__class__==H_Moving_Platform:
                                 f=1
                                 player.on_h_platform=True
