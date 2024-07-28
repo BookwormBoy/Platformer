@@ -36,6 +36,7 @@ class Level:
         self.on_blocks=pygame.sprite.Group()
         self.off_blocks=pygame.sprite.Group()
         self.shells=pygame.sprite.Group()
+        self.falling_platforms=pygame.sprite.Group()
         for row_index,row in enumerate(layout):
             for col_index, cell in enumerate(row):
                 x=tile_size*col_index
@@ -69,6 +70,10 @@ class Level:
                 elif cell == 'L':
                     tile=Shell((x, y))
                     self.shells.add(tile)
+                elif cell == 'J':
+                    tile = Falling_Platform((x, y), tile_size)
+                    self.tiles.add(tile)
+                    self.falling_platforms.add(tile)
 
 
     def scroll_x(self):
@@ -189,7 +194,7 @@ class Level:
                         # print('cx', tile.rect.x, player.rect.x, tile.rect.y, player.rect.y)
                         player.dead=True
                 else:
-                    if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True):
+                    if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True) or tile.__class__==Falling_Platform:
                         pass
                     else:
                         if vel<0:
@@ -292,10 +297,13 @@ class Level:
             player.acc.y=0.45
         if(player.status=='wall_slide'):
             player.acc.y=0.2
+        if(player.on_fp):
+            player.acc.y=0
         player.vel.y+=player.acc.y
         player.pos.y += player.vel.y
         player.coords.y += player.vel.y
         player.rect.y = int(player.pos.y)
+
 
         for b in self.bullets.sprites():
             b.move_y()
@@ -303,7 +311,19 @@ class Level:
         for shell in self.shells.sprites():
             shell.move_y(self.shift_y, player.pos.y-31, player.coords.y-31)
 
+        for p in self.falling_platforms.sprites():
+            p.move()
+            self.fp_speed=p.vel.y
+
+        if player.on_fp:
+            player.pos.y+=self.fp_speed+1
+            player.coords.y+=self.fp_speed
+            player.rect.y=int(player.pos.y)+1
+
+        
+
         self.tiles.update(0, self.shift_y)
+
        
         # print(player.vel.y)
         # print('b', player.vel.x, player.rect.x, player.rect.x+player.rect.width)
@@ -317,7 +337,22 @@ class Level:
             # print(tile.rect.top, end=' ')
             if tile.rect.colliderect(player.rect):
 
-                if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True):
+                #falling platforms
+                if tile.__class__==Falling_Platform:
+                    f=1
+                    if player.vel.y>=0:
+                        player.pos.y = tile.rect.top - player.rect.height+1
+                        player.rect.y = int(player.pos.y)
+                        player.coords.y = tile.coords.y - player.rect.height
+                        player.vel.y = 0
+                        player.on_ground = True
+                        player.jumped=False
+                        tile.triggered=True
+                        player.on_fp=True
+                        self.fp_speed=tile.vel.y
+                        # print(self.fp_speed)
+
+                if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True) or tile.__class__==Falling_Platform:
                         pass
                 # print('c')
                 else:
@@ -346,7 +381,6 @@ class Level:
                             player.pos.y = tile.rect.top - player.rect.height
                             player.rect.y = int(player.pos.y)
                             player.coords.y = tile.coords.y - player.rect.height
-                            # print('after c', player.rect.y, tile.rect.top)
                             player.vel.y = 0
                             player.on_ground = True
                             player.jumped=False
@@ -360,6 +394,21 @@ class Level:
                     else:
                         if player.on_h_platform:
                             f=1
+                        if player.on_fp:
+                            print('here')
+                            player.pos.y = tile.rect.top - player.rect.height
+                            player.rect.y = int(player.pos.y)
+                            player.coords.y = tile.coords.y - player.rect.height
+                            player.vel.y = 0
+                            player.on_ground = True
+                            player.jumped=False
+
+
+        if player.on_fp and f==0:
+            player.on_fp=False
+                
+
+               
 
             for shell in self.shells.sprites():
                 if tile.rect.colliderect(shell.rect): #shell-tile collision

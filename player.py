@@ -34,6 +34,7 @@ class Player(pygame.sprite.Sprite):
         self.on_h_platform=True
         self.dead=False
         self.holding_shell=False
+        self.on_fp=False
 
     def import_character_assets(self):
         character_path='./graphics/character/'
@@ -175,6 +176,8 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_d] and self.on_ground: #jump
             self.jumped=True
             self.vel.y = -17
+            if self.on_fp:
+                self.on_fp=False
 
         if keys[pygame.K_d] and self.jumped:
             self.slow_jump=True
