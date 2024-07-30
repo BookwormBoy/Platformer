@@ -2,14 +2,14 @@ import pygame
 import math
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, pos, size):
+    def __init__(self, pos,coords, size):
         super().__init__()
         self.image = pygame.Surface((size, size))
         self.image.fill('grey')
         self.rect=self.image.get_rect(topleft = pos)
 
         self.pos = pygame.math.Vector2(self.rect.x, self.rect.y)
-        self.coords = pygame.math.Vector2(self.rect.x, self.rect.y)
+        self.coords = pygame.math.Vector2(coords[0], coords[1])
         self.vel = pygame.math.Vector2(0, 0)
         self.acc = pygame.math.Vector2(0,0)
     def update(self, x_shift, y_shift):
@@ -25,8 +25,8 @@ class Tile(pygame.sprite.Sprite):
         self.rect.y = int(self.pos.y)
 
 class H_Moving_Platform(Tile):
-    def __init__(self, pos, size):
-        super().__init__(pos, size)
+    def __init__(self, pos,coords, size):
+        super().__init__(pos,coords, size)
         self.image = pygame.Surface((size*3, size))
         self.image.fill('blue')
         self.rect=self.image.get_rect(topleft = pos)
@@ -41,15 +41,15 @@ class H_Moving_Platform(Tile):
         # print(self.rect.x)
 
 class Canon(Tile):
-    def __init__(self, pos, size):
-        super().__init__(pos, size)
+    def __init__(self, pos, coords,size):
+        super().__init__(pos, coords,size)
         self.image = pygame.Surface((size, size))
         self.image.fill('blue')
         self.freq=120
 
 class Bullet(Tile):
-    def __init__(self, pos, size):
-        super().__init__(pos, size)
+    def __init__(self, pos,coords, size):
+        super().__init__(pos, coords, size)
         self.image = pygame.Surface((30, 10))
         self.image.fill('green')
         self.rect=self.image.get_rect(topleft=pos)
@@ -72,8 +72,8 @@ class Bullet(Tile):
         self.rect.y=int(self.pos.y)
 
 class On_Off_Switch(Tile):
-    def __init__(self, pos, size):
-        super().__init__(pos, size)
+    def __init__(self, pos, coords,size):
+        super().__init__(pos, coords, size)
         self.image.fill('purple')
 
     def change_sprite(self, on):
@@ -83,8 +83,8 @@ class On_Off_Switch(Tile):
             self.image.fill('blue')
 
 class On_Block(Tile):
-    def __init__(self, pos, size):
-        super().__init__(pos, size)
+    def __init__(self, pos, coords, size):
+        super().__init__(pos,coords, size)
         self.image.fill('purple')
 
     def change_sprite(self, on):
@@ -94,8 +94,8 @@ class On_Block(Tile):
             self.image.fill('pink')
 
 class Off_Block(Tile):
-    def __init__(self, pos, size):
-        super().__init__(pos, size)
+    def __init__(self, pos, coords,size):
+        super().__init__(pos, coords, size)
         self.image.fill('light blue')
 
     def change_sprite(self, on):
@@ -105,14 +105,14 @@ class Off_Block(Tile):
             self.image.fill('blue')
 
 class Shell(pygame.sprite.Sprite):
-    def __init__(self, pos):
+    def __init__(self, coords,pos):
         super().__init__()
         self.image = pygame.Surface((30, 30))
         self.image.fill('grey')
         self.rect=self.image.get_rect(topleft = pos)
 
         self.pos = pygame.math.Vector2(self.rect.x, self.rect.y)
-        self.coords = pygame.math.Vector2(self.rect.x, self.rect.y)
+        self.coords = pygame.math.Vector2(coords[0], coords[1])
         self.vel = pygame.math.Vector2(0, 0)
         self.acc = pygame.math.Vector2(0,0.6)
 
@@ -145,8 +145,8 @@ class Shell(pygame.sprite.Sprite):
         self.rect.y=int(self.pos.y)
 
 class Falling_Platform(Tile):
-    def __init__(self, pos, size):
-        super().__init__(pos, size)
+    def __init__(self, pos, coords,size):
+        super().__init__(pos,coords, size)
         self.image.fill('blue')
         self.triggered=False
 
@@ -158,23 +158,23 @@ class Falling_Platform(Tile):
             self.rect.y=int(self.pos.y)
 
 class Spike(Tile):
-    def __init__(self, pos, size):
-        super().__init__(pos, size)
+    def __init__(self, pos, coords,size):
+        super().__init__(pos, coords,size)
         self.image.fill('red')
 
 class Firejet(Tile):
-    def __init__(self, pos, size):
-        super().__init__(pos, size)
+    def __init__(self, pos, coords,size):
+        super().__init__(pos, coords,size)
         self.image.fill('blue')
 
 class Flame(pygame.sprite.Sprite):
-    def __init__(self, pos, size):
+    def __init__(self, pos, coords,size):
         super().__init__()
         self.image = pygame.Surface((size, size))
         self.rect=self.image.get_rect(topleft = pos)
 
         self.pos = pygame.math.Vector2(self.rect.x, self.rect.y)
-        self.coords = pygame.math.Vector2(self.rect.x, self.rect.y)
+        self.coords = pygame.math.Vector2(coords[0], coords[1])
         self.image.fill('red')
         self.on=True
         self.freq=200
@@ -187,6 +187,24 @@ class Flame(pygame.sprite.Sprite):
     def move_y(self, shift):
         self.pos.y+=shift
         self.coords.y+=shift
+        self.rect.y=int(self.pos.y)
+
+class Checkpoint(pygame.sprite.Sprite):
+    def __init__(self, pos, coords,size):
+        super().__init__()
+        self.image = pygame.Surface((size, size))
+        self.rect=self.image.get_rect(topleft = pos)
+
+        self.pos = pygame.math.Vector2(self.rect.x, self.rect.y)
+        self.coords = pygame.math.Vector2(coords[0], coords[1])
+        self.image.fill('blue')
+
+    def move_x(self, shift):
+        self.pos.x+=shift
+        self.rect.x=int(self.pos.x)
+
+    def move_y(self, shift):
+        self.pos.y+=shift
         self.rect.y=int(self.pos.y)
 
 

@@ -2,7 +2,7 @@ import pygame
 from support import import_folder
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos):
+    def __init__(self, pos, coords):
         super().__init__()
         self.import_character_assets()
         self.frame_index=0
@@ -12,7 +12,7 @@ class Player(pygame.sprite.Sprite):
         self.slide_rect=self.rect.inflate((12, -12))
         # self.slide_rect = pygame.Rect((self.rect.x, self.rect.y+12), (self.rect.width+12, self.rect.height-12))
         self.pos = pygame.math.Vector2(self.rect.x, self.rect.y)
-        self.coords = pygame.math.Vector2(self.rect.x, self.rect.y)
+        self.coords = pygame.math.Vector2(coords[0], coords[1])
         self.vel = pygame.math.Vector2(0, 0)
         self.acc = pygame.math.Vector2(0, 0)
         self.walkspeed=3
@@ -20,6 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.rundec=0.2
         self.runspeed=8
         self.prev_x_vel=0
+        self.wall_jumped=-501
 
         self.on_ground = True
         self.status='idle'
@@ -36,6 +37,7 @@ class Player(pygame.sprite.Sprite):
         self.dead=False
         self.holding_shell=False
         self.on_fp=False
+        self.wj=False
 
     def import_character_assets(self):
         character_path='./graphics/character/'
@@ -129,24 +131,34 @@ class Player(pygame.sprite.Sprite):
                         self.slowdown=True
         else:
             self.acc.x=0
-            if self.vel.x>0:
-                if keys[pygame.K_LEFT]:
-                    self.vel.x=self.vel.x*0.9
-                    if not self.jump_cancelled:
-                        self.facing_right=False
-                        self.jump_cancelled=True
-            elif self.vel.x<0:
-                if keys[pygame.K_RIGHT]:
-                    self.vel.x=self.vel.x*0.9
-                    if not self.jump_cancelled:
-                        self.facing_right=True
-                        self.jump_cancelled=True
-            else:
-                if keys[pygame.K_RIGHT]:
-                    self.vel.x=2
-                elif keys[pygame.K_LEFT]:
-                    self.vel.x=-2
+            t=pygame.time.get_ticks()
+            if (t-self.wall_jumped>300):
+                if self.vel.x>0:
+                    if keys[pygame.K_LEFT]:
+                        self.vel.x=self.vel.x*0.95
+                        if not self.jump_cancelled:
+                            self.facing_right=False
+                            self.jump_cancelled=True
+                elif self.vel.x<0:
+                    if keys[pygame.K_RIGHT]:
+                        self.vel.x=self.vel.x*0.9
+                        if not self.jump_cancelled:
+                            self.facing_right=True
+                            self.jump_cancelled=True
+                else:
+                    if keys[pygame.K_RIGHT]:
+                        self.vel.x=2
+                        # print(self.vel.x)
+                    else:
+                        self.vel.x=0
 
+                    if keys[pygame.K_LEFT]:
+                        self.vel.x=-2
+                    else:
+                        if not keys[pygame.K_RIGHT]:
+                            self.vel.x=0
+
+        # print(self.vel.x, self.jump_cancelled)
 
         if not self.on_ground:
             self.sliding=False
@@ -161,9 +173,24 @@ class Player(pygame.sprite.Sprite):
                 self.vel.x=0
 
 
-        # print(self.acc.x, self.vel.x)
-                          
 
+        if keys[pygame.K_d] and self.status=='wall_slide':
+            self.vel.y=-15
+            if self.touching_wall_r:
+                self.vel.x=-10
+                self.jump_cancelled=False
+                self.wall_jumped=pygame.time.get_ticks()
+                self.wj=True
+                self.facing_right=not self.facing_right
+            elif self.touching_wall_l:
+                self.vel.x=-10
+                self.jump_cancelled=False
+                self.facing_right=not self.facing_right
+        
+
+        # print(self.acc.x, self.vel.x)
+        # print(self.vel.x, self.jump_cancelled, self.facing_right)  
+            # print('w')
         if self.vel.x>0 and not self.jump_cancelled:
             self.facing_right=True
         elif self.vel.x<0 and not self.jump_cancelled:
@@ -185,14 +212,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.slow_jump=False
 
-        if keys[pygame.K_d] and self.status=='wall_slide':
-            self.vel.y-=25
-            if self.touching_wall_r:
-                self.vel.x-=15
-            elif self.touching_wall_l:
-                self.vel.x+=15
-        
-
+       
 
     def get_status(self):
 

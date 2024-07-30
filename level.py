@@ -6,6 +6,10 @@ from settings import *
 class Level:
     def __init__(self, level_data, surface):
         self.display_surface = surface
+        self.offset_x=0
+        self.offset_y=0
+        self.player_start_x=0
+        self.player_start_y=0
         self.setup_level(level_data)
         self.shift_x = 0
         self.shift_y = 0
@@ -29,8 +33,11 @@ class Level:
 
         self.right_calibration=level_width
         self.left_calibration=0
+       
     
     def setup_level(self, layout ):
+        self.right_calibration=level_width+self.offset_x
+        self.left_calibration=0+self.offset_x
         self.tiles = pygame.sprite.Group()
         self.blocks = pygame.sprite.Group()
         self.ropes = pygame.sprite.Group()
@@ -47,53 +54,59 @@ class Level:
         self.spikes=pygame.sprite.Group()
         self.flames=pygame.sprite.Group()
         self.on_flames=pygame.sprite.Group()
+        self.checkpoints=pygame.sprite.Group()
         for row_index,row in enumerate(layout):
             for col_index, cell in enumerate(row):
-                x=tile_size*col_index
-                y=tile_size*row_index
+                x=tile_size*col_index+self.offset_x
+                y=tile_size*row_index+self.offset_y
                 if cell == 'X':
-                    tile=Tile((x, y), tile_size)
+                    tile=Tile((x, y),(x-self.offset_x, y-self.offset_y), tile_size)
                     self.tiles.add(tile)
                 elif cell == 'P':
-                    p = Player((x, y))
+                    p = Player((x-self.offset_x, y-self.offset_y), (x-2*self.offset_x, y-2*self.offset_y))
                     self.player.add(p)
+                    self.player_start_x=x-self.offset_x
+                    self.player_start_y=y-self.offset_y
                 elif cell == 'H':
-                    p=H_Moving_Platform((x, y), tile_size)
+                    p=H_Moving_Platform((x, y),(x-self.offset_x, y-self.offset_y),  tile_size)
                     self.tiles.add(p)
                     self.h_moving_platforms.add(p)
                 elif cell == 'C':
-                    c=Canon((x, y), tile_size)
+                    c=Canon((x, y), (x-self.offset_x, y-self.offset_y), tile_size)
                     self.tiles.add(c)
                     self.canons.add(c)
                 elif cell == 'S':
-                    tile=On_Off_Switch((x, y), tile_size)
+                    tile=On_Off_Switch((x, y), (x-self.offset_x, y-self.offset_y), tile_size)
                     self.tiles.add(tile)
                     self.on_off_switches.add(tile)
                 elif cell == 'N':
-                    tile=On_Block((x, y), tile_size)
+                    tile=On_Block((x, y), (x-self.offset_x, y-self.offset_y), tile_size)
                     self.tiles.add(tile)
                     self.on_blocks.add(tile)
                 elif cell == 'F':
-                    tile=Off_Block((x, y), tile_size)
+                    tile=Off_Block((x, y), (x-self.offset_x, y-self.offset_y), tile_size)
                     self.tiles.add(tile)
                     self.off_blocks.add(tile)
                 elif cell == 'L':
-                    tile=Shell((x, y))
+                    tile=Shell((x, y)(x-self.offset_x, y-self.offset_y))
                     self.shells.add(tile)
                     print(len(self.shells))
                 elif cell == 'J':
-                    tile = Falling_Platform((x, y), tile_size)
+                    tile = Falling_Platform((x, y), (x-self.offset_x, y-self.offset_y), tile_size)
                     self.tiles.add(tile)
                     self.falling_platforms.add(tile)
                 elif cell == 'Y':
-                    tile=Spike((x, y), tile_size)
+                    tile=Spike((x, y), (x-self.offset_x, y-self.offset_y), tile_size)
                     self.tiles.add(tile)
                 elif cell == 'U':
-                    tile=Firejet((x, y), tile_size)
+                    tile=Firejet((x, y), (x-self.offset_x, y-self.offset_y), tile_size)
                     self.tiles.add(tile)
-                    flame=Flame((x, y-64), tile_size)
+                    flame=Flame((x, y-64), (x-self.offset_x, y-self.offset_y), tile_size)
                     self.flames.add(flame)
                     self.on_flames.add(flame)
+                elif cell == 'K':
+                    tile=Checkpoint((x, y), (x-self.offset_x, y-self.offset_y), tile_size)
+                    self.checkpoints.add(tile)
 
 
     def scroll_x(self):
@@ -211,6 +224,9 @@ class Level:
 
         for flame in self.flames.sprites():
             flame.move_x(self.shift_x)
+
+        for c in self.checkpoints.sprites():
+            c.move_x(self.shift_x)
 
         self.tiles.update(self.shift_x, 0)
 
@@ -359,6 +375,9 @@ class Level:
 
         for flame in self.flames.sprites():
             flame.move_y(self.shift_y)
+
+        for c in self.checkpoints.sprites():
+            c.move_y(self.shift_y)
 
         for p in self.falling_platforms.sprites():
             p.move()
@@ -606,6 +625,18 @@ class Level:
                 player.dead=True
 
         # print(len(self.flames), len(self.on_flames))
+
+    def handle_checkpoints(self):
+        player=self.player.sprite
+        for c in self.checkpoints.sprites():
+            if c.rect.colliderect(player.rect):
+                self.offset_x=-c.coords.x+self.player_start_x
+                self.offset_y=-c.coords.y+self.player_start_y
+
+        print(self.offset_x, self.offset_y)
+
+    def reset(self):
+        self.setup_level(self.level_data)
   
 
     def run(self):
@@ -631,10 +662,12 @@ class Level:
             self.shoot_canon()
             self.handle_shells()
             self.handle_flames()
+            self.handle_checkpoints()
 
         self.bullets.draw(self.display_surface)
         self.shells.draw(self.display_surface)
         self.on_flames.draw(self.display_surface)
+        self.checkpoints.draw(self.display_surface)
         
 
         if not self.paused:
@@ -654,6 +687,9 @@ class Level:
         if not self.paused:
             self.time+=1
 
-        
+        if player.dead or player.coords.y+player.rect.height>level_height:
+            self.reset()        
+
+        print(player.coords)
 
                
