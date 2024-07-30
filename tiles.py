@@ -167,11 +167,27 @@ class Firejet(Tile):
         super().__init__(pos, size)
         self.image.fill('blue')
 
-class Flame(Tile):
+class Flame(pygame.sprite.Sprite):
     def __init__(self, pos, size):
-        super().__init__(pos, size)
+        super().__init__()
+        self.image = pygame.Surface((size, size))
+        self.rect=self.image.get_rect(topleft = pos)
+
+        self.pos = pygame.math.Vector2(self.rect.x, self.rect.y)
+        self.coords = pygame.math.Vector2(self.rect.x, self.rect.y)
         self.image.fill('red')
-        self.on=False
+        self.on=True
+        self.freq=200
+
+    def move_x(self, shift):
+        self.pos.x+=shift
+        self.coords.x+=shift
+        self.rect.x=int(self.pos.x)
+
+    def move_y(self, shift):
+        self.pos.y+=shift
+        self.coords.y+=shift
+        self.rect.y=int(self.pos.y)
 
 
 

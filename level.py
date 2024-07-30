@@ -46,6 +46,7 @@ class Level:
         self.falling_platforms=pygame.sprite.Group()
         self.spikes=pygame.sprite.Group()
         self.flames=pygame.sprite.Group()
+        self.on_flames=pygame.sprite.Group()
         for row_index,row in enumerate(layout):
             for col_index, cell in enumerate(row):
                 x=tile_size*col_index
@@ -79,6 +80,7 @@ class Level:
                 elif cell == 'L':
                     tile=Shell((x, y))
                     self.shells.add(tile)
+                    print(len(self.shells))
                 elif cell == 'J':
                     tile = Falling_Platform((x, y), tile_size)
                     self.tiles.add(tile)
@@ -91,7 +93,7 @@ class Level:
                     self.tiles.add(tile)
                     flame=Flame((x, y-64), tile_size)
                     self.flames.add(flame)
-                    self.tiles.add(flame)
+                    self.on_flames.add(flame)
 
 
     def scroll_x(self):
@@ -102,38 +104,26 @@ class Level:
         if player.facing_right:
             if player.coords.x<screen_width/3 or self.right_calibration<screen_width:
                 self.shift_x=0
-                # self.shift_player=False
-                # self.dont_shift=False
             elif player.pos.x>screen_width/3:
                 self.shift_x=-3*(player.prev_x_vel)/2
-                # self.shift_player=True
-                # self.dont_shift=False
                 player.pos.x-=3*player.prev_x_vel/2
             
             else:
                 self.shift_x=-player.prev_x_vel
-                # self.dont_shift=True
-                # self.shift_player=False
                 player.pos.x-=player.prev_x_vel
         else:
             if self.left_calibration>0 or player.coords.x>level_width-screen_width/3:
                 self.shift_x=0
-                # self.shift_player=False
-                # self.dont_shift=False
             elif player.pos.x<2*screen_width/3:
                 self.shift_x=-3*(player.prev_x_vel)/2
-                # self.shift_player=True
-                # self.dont_shift=False
                 player.pos.x-=3*player.prev_x_vel/2
             
             else:
                 self.shift_x=-player.vel.x
-                # self.dont_shift=True
-                # self.shift_player=False
                 player.pos.x-=player.vel.x
 
 
-        print('cam', player.vel.x, player.prev_x_vel)
+        # print('cam', player.vel.x, player.prev_x_vel)
         self.right_calibration+=self.shift_x
         self.left_calibration+=self.shift_x
 
@@ -175,7 +165,7 @@ class Level:
     def x_collisions(self):
         
         player = self.player.sprite
-        print('pxcol', player.vel.x)
+        # print('pxcol', player.vel.x)
         # print(player.on_h_platform)
         # if player.on_h_platform:
         #     print(player.vel.x, self.hp_speed, self.prev_hp_speed)
@@ -219,16 +209,19 @@ class Level:
         for shell in self.shells.sprites():
             shell.move_x(self.shift_x, player.rect.x, player.coords.x)
 
+        for flame in self.flames.sprites():
+            flame.move_x(self.shift_x)
+
         self.tiles.update(self.shift_x, 0)
 
         # for p in self.h_moving_platforms:
         #     print('pv', p.vel.x)
-        print('prect' ,player.rect.x+player.rect.width)
+        # print('prect' ,player.rect.x+player.rect.width)
         # print('x_sol', player.rect.x+player.rect.width, player.rect.y)
         for tile in self.tiles.sprites():
-            print(tile.rect.x, end=' ')
+            # print(tile.rect.x, end=' ')
             if tile.rect.colliderect(player.rect):
-                print('c', end=' ')
+                # print('c', end=' ')
                 f=1
 
                 # print('cx', tile.rect.top, player.rect.top)
@@ -338,7 +331,7 @@ class Level:
                 player.touching_wall_r=False
                 player.vel.x-=1
 
-        print('xcol', player.vel.x)
+        # print('xcol', player.vel.x)
 
     def y_collisions(self):
 
@@ -363,6 +356,9 @@ class Level:
 
         for shell in self.shells.sprites():
             shell.move_y(self.shift_y, player.pos.y-31, player.coords.y-31)
+
+        for flame in self.flames.sprites():
+            flame.move_y(self.shift_y)
 
         for p in self.falling_platforms.sprites():
             p.move()
@@ -463,14 +459,14 @@ class Level:
                             player.jumped=False
 
 
-        if player.on_fp and f==0:
-            player.on_fp=False
-                
+       
 
                
-
+            # print(len(self.shells))
             for shell in self.shells.sprites():
+                # print(shell.rect.bottom, tile.rect.top)
                 if tile.rect.colliderect(shell.rect): #shell-tile collision
+                    # print('pls')
                     if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True):
                         pass
                     else:
@@ -492,6 +488,7 @@ class Level:
         #player-shell collision
 
         for shell in self.shells.sprites():
+            # print(shell.rect.bottom+shell.rect.width, tile.rect.top)
             if shell.rect.colliderect(player.rect) and not shell.held and not player.dead:
                 if shell.rect.y>player.rect.y:
                     player.pos.y = shell.rect.top - player.rect.height
@@ -534,6 +531,10 @@ class Level:
             player.vel.x+=self.hp_speed
             player.on_h_platform=False
 
+        if player.on_fp and f==0:
+            player.on_fp=False
+                
+
         # print('ycol', player.vel)
 
 
@@ -574,7 +575,6 @@ class Level:
                 shell.held=False
                 player.holding_shell=False
                 if keys[pygame.K_UP]:
-                    print('thrown')
                     shell.vel.y=-20
                     shell.vel.x=player.vel.x
                     self.thrown_up=pygame.time.get_ticks()
@@ -590,6 +590,22 @@ class Level:
 
             # print(shell.held, shell.vel, shell.kicked)
 
+    
+    def handle_flames(self):
+        player=self.player.sprite
+        for flame in self.flames.sprites():
+            # print(flame.on)
+            if self.time%flame.freq==0:
+                if flame.on:
+                    self.on_flames.remove(flame)
+                else:
+                    self.on_flames.add(flame)
+                flame.on=not flame.on
+
+            if flame.rect.colliderect(player.rect) and flame.on:
+                player.dead=True
+
+        # print(len(self.flames), len(self.on_flames))
   
 
     def run(self):
@@ -614,9 +630,12 @@ class Level:
         if not self.paused:
             self.shoot_canon()
             self.handle_shells()
+            self.handle_flames()
 
         self.bullets.draw(self.display_surface)
         self.shells.draw(self.display_surface)
+        self.on_flames.draw(self.display_surface)
+        
 
         if not self.paused:
             self.player.update()
