@@ -633,7 +633,7 @@ class Level:
                 self.offset_x=-c.coords.x+self.player_start_x
                 self.offset_y=-c.coords.y+self.player_start_y
 
-        print(self.offset_x, self.offset_y)
+        # print(self.offset_x, self.offset_y)
 
     def reset(self):
         self.setup_level(self.level_data)
@@ -690,6 +690,6 @@ class Level:
         if player.dead or player.coords.y+player.rect.height>level_height:
             self.reset()        
 
-        print(player.coords)
+        # print(player.coords)
 
                
