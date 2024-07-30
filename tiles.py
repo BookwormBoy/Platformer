@@ -162,4 +162,17 @@ class Spike(Tile):
         super().__init__(pos, size)
         self.image.fill('red')
 
+class Firejet(Tile):
+    def __init__(self, pos, size):
+        super().__init__(pos, size)
+        self.image.fill('blue')
+
+class Flame(Tile):
+    def __init__(self, pos, size):
+        super().__init__(pos, size)
+        self.image.fill('red')
+        self.on=False
+
+
+
 

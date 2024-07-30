@@ -19,6 +19,7 @@ class Player(pygame.sprite.Sprite):
         self.runacc=0.1
         self.rundec=0.2
         self.runspeed=8
+        self.prev_x_vel=0
 
         self.on_ground = True
         self.status='idle'
@@ -259,7 +260,7 @@ class Player(pygame.sprite.Sprite):
        
 
     def update(self):
-
+        self.prev_x_vel=self.vel.x
         self.get_input()
         self.get_status()
         self.animate()

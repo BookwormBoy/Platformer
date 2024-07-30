@@ -24,7 +24,8 @@ class Level:
         self.shell_regrab=0
         self.paused=False
         self.pause_start=0
-        self.pshifting=False
+        self.shift_player=False
+        self.dont_shift=False
 
         self.right_calibration=level_width
         self.left_calibration=0
@@ -44,6 +45,7 @@ class Level:
         self.shells=pygame.sprite.Group()
         self.falling_platforms=pygame.sprite.Group()
         self.spikes=pygame.sprite.Group()
+        self.flames=pygame.sprite.Group()
         for row_index,row in enumerate(layout):
             for col_index, cell in enumerate(row):
                 x=tile_size*col_index
@@ -84,6 +86,12 @@ class Level:
                 elif cell == 'Y':
                     tile=Spike((x, y), tile_size)
                     self.tiles.add(tile)
+                elif cell == 'U':
+                    tile=Firejet((x, y), tile_size)
+                    self.tiles.add(tile)
+                    flame=Flame((x, y-64), tile_size)
+                    self.flames.add(flame)
+                    self.tiles.add(flame)
 
 
     def scroll_x(self):
@@ -94,34 +102,38 @@ class Level:
         if player.facing_right:
             if player.coords.x<screen_width/3 or self.right_calibration<screen_width:
                 self.shift_x=0
-                self.shift_player=False
-                self.dont_shift=False
+                # self.shift_player=False
+                # self.dont_shift=False
             elif player.pos.x>screen_width/3:
-                self.shift_x=-3*(player.vel.x)/2
-                self.shift_player=True
-                self.dont_shift=False
+                self.shift_x=-3*(player.prev_x_vel)/2
+                # self.shift_player=True
+                # self.dont_shift=False
+                player.pos.x-=3*player.prev_x_vel/2
             
             else:
-                self.shift_x=-player.vel.x
-                self.dont_shift=True
-                self.shift_player=False
+                self.shift_x=-player.prev_x_vel
+                # self.dont_shift=True
+                # self.shift_player=False
+                player.pos.x-=player.prev_x_vel
         else:
             if self.left_calibration>0 or player.coords.x>level_width-screen_width/3:
                 self.shift_x=0
-                self.shift_player=False
-                self.dont_shift=False
+                # self.shift_player=False
+                # self.dont_shift=False
             elif player.pos.x<2*screen_width/3:
-                self.shift_x=-3*(player.vel.x)/2
-                self.shift_player=True
-                self.dont_shift=False
+                self.shift_x=-3*(player.prev_x_vel)/2
+                # self.shift_player=True
+                # self.dont_shift=False
+                player.pos.x-=3*player.prev_x_vel/2
             
             else:
                 self.shift_x=-player.vel.x
-                self.dont_shift=True
-                self.shift_player=False
+                # self.dont_shift=True
+                # self.shift_player=False
+                player.pos.x-=player.vel.x
 
 
-        # print(player.coords.x, player.pos.x, self.shift_x)
+        print('cam', player.vel.x, player.prev_x_vel)
         self.right_calibration+=self.shift_x
         self.left_calibration+=self.shift_x
 
@@ -163,7 +175,7 @@ class Level:
     def x_collisions(self):
         
         player = self.player.sprite
-        # print('pxcol', player.vel.x, end=' ')
+        print('pxcol', player.vel.x)
         # print(player.on_h_platform)
         # if player.on_h_platform:
         #     print(player.vel.x, self.hp_speed, self.prev_hp_speed)
@@ -187,12 +199,7 @@ class Level:
                 player.vel.x-=1
 
         # print(self.shift_player, self.dont_shift, player.coords.x, player.pos.x)
-        if self.shift_player:
-            player.pos.x -= player.vel.x/2
-        elif self.dont_shift:
-            player.pos.x+=0
-        else:
-            player.pos.x += player.vel.x
+        player.pos.x+=player.vel.x
 
         player.coords.x+=player.vel.x
 
@@ -216,11 +223,12 @@ class Level:
 
         # for p in self.h_moving_platforms:
         #     print('pv', p.vel.x)
-        
+        print('prect' ,player.rect.x+player.rect.width)
         # print('x_sol', player.rect.x+player.rect.width, player.rect.y)
         for tile in self.tiles.sprites():
-            # print(tile.rect.top, end=' ')
+            print(tile.rect.x, end=' ')
             if tile.rect.colliderect(player.rect):
+                print('c', end=' ')
                 f=1
 
                 # print('cx', tile.rect.top, player.rect.top)
@@ -317,16 +325,20 @@ class Level:
         if player.status=='wall_slide' and f==0:
             if player.touching_wall_l:
                 player.touching_wall_l=False
+                player.vel.x-=1
             elif player.touching_wall_r:
                 player.touching_wall_r=False
+                player.vel.x-=1
 
         if player.stationary_x and f==0:
             if player.touching_wall_l:
                 player.touching_wall_l=False
+                player.vel.x-=1
             elif player.touching_wall_r:
                 player.touching_wall_r=False
+                player.vel.x-=1
 
-        # print('xcol', player.vel.x, end=' ')
+        print('xcol', player.vel.x)
 
     def y_collisions(self):
 
@@ -610,6 +622,7 @@ class Level:
             self.player.update()
             self.scroll_x()
             self.x_collisions() 
+            
             self.scroll_y()
             self.y_collisions()
         if player.sliding:
