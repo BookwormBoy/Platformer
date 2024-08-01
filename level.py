@@ -2,6 +2,7 @@ import pygame
 from tiles import *
 from player import Player
 from settings import *
+from enemies import *
 
 class Level:
     def __init__(self, level_data, surface):
@@ -55,6 +56,7 @@ class Level:
         self.flames=pygame.sprite.Group()
         self.on_flames=pygame.sprite.Group()
         self.checkpoints=pygame.sprite.Group()
+        self.ninja=pygame.sprite.GroupSingle()
         for row_index,row in enumerate(layout):
             for col_index, cell in enumerate(row):
                 x=tile_size*col_index+self.offset_x
@@ -88,7 +90,7 @@ class Level:
                     self.tiles.add(tile)
                     self.off_blocks.add(tile)
                 elif cell == 'L':
-                    tile=Shell((x, y)(x-self.offset_x, y-self.offset_y))
+                    tile=Shell((x, y),(x-self.offset_x, y-self.offset_y))
                     self.shells.add(tile)
                     print(len(self.shells))
                 elif cell == 'J':
@@ -107,6 +109,9 @@ class Level:
                 elif cell == 'K':
                     tile=Checkpoint((x, y), (x-self.offset_x, y-self.offset_y), tile_size)
                     self.checkpoints.add(tile)
+                elif cell == 'I':
+                    ninja=Ninja((x, y-128))
+                    self.ninja.add(ninja)
 
 
     def scroll_x(self):
@@ -641,6 +646,7 @@ class Level:
 
     def run(self):
         player=self.player.sprite
+        ninja=self.ninja.sprite
 
         keys=pygame.key.get_pressed()
         t=pygame.time.get_ticks()
@@ -663,12 +669,15 @@ class Level:
             self.handle_shells()
             self.handle_flames()
             self.handle_checkpoints()
+            if len(self.ninja)==1:
+                ninja.run(player)
 
         self.bullets.draw(self.display_surface)
         self.shells.draw(self.display_surface)
         self.on_flames.draw(self.display_surface)
         self.checkpoints.draw(self.display_surface)
-        
+        if len(self.ninja)==1:
+            self.ninja.draw(self.display_surface)
 
         if not self.paused:
             self.player.update()
