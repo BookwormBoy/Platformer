@@ -686,12 +686,16 @@ class Level:
             
             self.scroll_y()
             self.y_collisions()
-        if player.sliding:
+
+        if player.attacking:
+            player.rect.y-=12
+        elif player.sliding:
             player.rect.y+=25
         self.player.draw(self.display_surface)
-
-        if player.sliding:
-                player.rect.y-=25
+        if player.attacking:
+            player.rect.y+=12
+        elif player.sliding:
+            player.rect.y-=25
 
         if not self.paused:
             self.time+=1

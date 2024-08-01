@@ -38,14 +38,16 @@ class Player(pygame.sprite.Sprite):
         self.holding_shell=False
         self.on_fp=False
         self.wj=False
+        self.attacking=False
+        self.next_attack=False
 
     def import_character_assets(self):
         character_path='./graphics/character/'
-        self.animations={'idle':[], 'walk':[], 'jump':[], 'fall':[], 'wall_slide':[], 'run':[], 'slide':[], 'dead':[]}
-        cx={'idle':14, 'jump':17, 'walk':21, 'fall':17, 'wall_slide':15, 'run': 17, 'slide':9, 'dead':4}
-        cy={'idle':6, 'jump':7, 'walk':7, 'fall':1, 'wall_slide':3, 'run':7, 'slide':19, 'dead':7}
-        w={'idle':19, 'jump':19, 'walk':19, 'fall':19, 'wall_slide':19, 'run': 19, 'slide':31, 'dead':29}
-        h={'idle':30, 'jump':30, 'walk':30, 'fall':30, 'wall_slide':30, 'run': 30, 'slide':18, 'dead':29}
+        self.animations={'idle':[], 'walk':[], 'jump':[], 'fall':[], 'wall_slide':[], 'run':[], 'slide':[], 'dead':[], 'attack1':[], 'attack2':[], 'attack3':[]}
+        cx={'idle':14, 'jump':17, 'walk':21, 'fall':17, 'wall_slide':15, 'run': 17, 'slide':9, 'dead':4, 'attack1':0, 'attack2':0, 'attack3':0}
+        cy={'idle':6, 'jump':7, 'walk':7, 'fall':1, 'wall_slide':3, 'run':7, 'slide':19, 'dead':7, 'attack1':0, 'attack2':0, 'attack3':0}
+        w={'idle':19, 'jump':19, 'walk':19, 'fall':19, 'wall_slide':19, 'run': 19, 'slide':31, 'dead':29, 'attack1':50, 'attack2':50, 'attack3':50}
+        h={'idle':30, 'jump':30, 'walk':30, 'fall':30, 'wall_slide':30, 'run': 30, 'slide':18, 'dead':29, 'attack1':37, 'attack2':37, 'attack3':37}
 
 
         for animation in self.animations.keys():
@@ -54,111 +56,125 @@ class Player(pygame.sprite.Sprite):
 
     def get_input(self):
         keys = pygame.key.get_pressed()
-
         if self.dead:
             return
 
-        if self.on_ground:
-            self.jump_cancelled=False
+        if self.attacking:    #attack handling
+            if self.status=='attack1' and self.frame_index>2:
+                if keys[pygame.K_SPACE]:
+                    self.next_attack=True
+            elif self.status=='attack2' and self.frame_index>2:
+                if keys[pygame.K_SPACE]:
+                    self.next_attack=True
+        else:
+            if keys[pygame.K_SPACE]:
+                self.frame_index=0
+                self.status='attack1'
+                self.attacking=True
+            else:
+                
 
-            if self.vel.x==0:  #x-movement
-                self.sliding=False
-                if keys[pygame.K_RIGHT]:
-                    self.slowdown=False
-                    if keys[pygame.K_s]:
-                        self.acc.x=self.runacc
+                if self.on_ground:
+                    self.jump_cancelled=False
+
+                    if self.vel.x==0:  #x-movement
+                        self.sliding=False
+                        if keys[pygame.K_RIGHT]:
+                            self.slowdown=False
+                            if keys[pygame.K_s]:
+                                self.acc.x=self.runacc
+                            else:
+                                self.vel.x=self.walkspeed
+                                self.acc.x=0
+                        elif keys[pygame.K_LEFT]:
+                            self.slowdown=False
+                            if keys[pygame.K_s]:
+                                self.acc.x=-self.runacc
+                            else:
+                                self.vel.x=-self.walkspeed
+                                self.acc.x=0
+                        else:
+                            self.acc.x=0
+                            self.vel.x=0
+                    elif (abs(self.vel.x))<=self.walkspeed:
+                        if self.sliding:
+                            if self.vel.x>0 and not keys[pygame.K_LEFT]:
+                                self.sliding=False
+                            elif self.vel.x<0 and not keys[pygame.K_RIGHT]:
+                                self.sliding=False
+                        else:
+                            if keys[pygame.K_RIGHT]:
+                                self.slowdown=False
+                                if keys[pygame.K_s]:
+                                    self.acc.x=self.runacc
+                                else:
+                                    self.vel.x=self.walkspeed
+                                    self.acc.x=0
+                            elif keys[pygame.K_LEFT]:
+                                self.slowdown=False
+                                if keys[pygame.K_s]:
+                                    self.acc.x=-self.runacc
+                                else:
+                                    self.vel.x=-self.walkspeed
+                                    self.acc.x=0
+                            else:
+                                self.acc.x=0
+                                self.vel.x=0
                     else:
-                        self.vel.x=self.walkspeed
-                        self.acc.x=0
-                elif keys[pygame.K_LEFT]:
-                    self.slowdown=False
-                    if keys[pygame.K_s]:
-                        self.acc.x=-self.runacc
-                    else:
-                        self.vel.x=-self.walkspeed
-                        self.acc.x=0
+                        if self.sliding:
+                            if self.vel.x>0 and not keys[pygame.K_LEFT]:
+                                self.sliding=False
+                            elif self.vel.x<0 and not keys[pygame.K_RIGHT]:
+                                self.sliding=False
+                        else:
+                            if keys[pygame.K_s]:
+                                if keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
+                                    if keys[pygame.K_RIGHT] and self.vel.x<0:
+                                        self.sliding=True
+                                        self.slowdown=True
+                                    elif keys[pygame.K_RIGHT] and self.vel.x>0:
+                                        self.slowdown=False
+                                        self.acc.x=self.runacc
+                                    elif keys[pygame.K_LEFT] and self.vel.x>0:
+                                        self.sliding=True
+                                        self.slowdown=True
+                                    elif keys[pygame.K_LEFT] and self.vel.x<0:
+                                        self.slowdown=False
+                                        self.acc.x=-self.runacc
+                                else:
+                                    self.slowdown=True
+                            else:
+                                self.slowdown=True
                 else:
                     self.acc.x=0
-                    self.vel.x=0
-            elif (abs(self.vel.x))<=self.walkspeed:
-                if self.sliding:
-                    if self.vel.x>0 and not keys[pygame.K_LEFT]:
-                        self.sliding=False
-                    elif self.vel.x<0 and not keys[pygame.K_RIGHT]:
-                        self.sliding=False
-                else:
-                    if keys[pygame.K_RIGHT]:
-                        self.slowdown=False
-                        if keys[pygame.K_s]:
-                            self.acc.x=self.runacc
+                    t=pygame.time.get_ticks()
+                    if (t-self.wall_jumped>300):
+                        if self.vel.x>0:
+                            if keys[pygame.K_LEFT]:
+                                self.vel.x=self.vel.x*0.95
+                                if not self.jump_cancelled:
+                                    self.facing_right=False
+                                    self.jump_cancelled=True
+                        elif self.vel.x<0:
+                            if keys[pygame.K_RIGHT]:
+                                self.vel.x=self.vel.x*0.9
+                                if not self.jump_cancelled:
+                                    self.facing_right=True
+                                    self.jump_cancelled=True
                         else:
-                            self.vel.x=self.walkspeed
-                            self.acc.x=0
-                    elif keys[pygame.K_LEFT]:
-                        self.slowdown=False
-                        if keys[pygame.K_s]:
-                            self.acc.x=-self.runacc
-                        else:
-                            self.vel.x=-self.walkspeed
-                            self.acc.x=0
-                    else:
-                        self.acc.x=0
-                        self.vel.x=0
-            else:
-                if self.sliding:
-                    if self.vel.x>0 and not keys[pygame.K_LEFT]:
-                        self.sliding=False
-                    elif self.vel.x<0 and not keys[pygame.K_RIGHT]:
-                        self.sliding=False
-                else:
-                    if keys[pygame.K_s]:
-                        if keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
-                            if keys[pygame.K_RIGHT] and self.vel.x<0:
-                                self.sliding=True
-                                self.slowdown=True
-                            elif keys[pygame.K_RIGHT] and self.vel.x>0:
-                                self.slowdown=False
-                                self.acc.x=self.runacc
-                            elif keys[pygame.K_LEFT] and self.vel.x>0:
-                                self.sliding=True
-                                self.slowdown=True
-                            elif keys[pygame.K_LEFT] and self.vel.x<0:
-                                self.slowdown=False
-                                self.acc.x=-self.runacc
-                        else:
-                            self.slowdown=True
-                    else:
-                        self.slowdown=True
-        else:
-            self.acc.x=0
-            t=pygame.time.get_ticks()
-            if (t-self.wall_jumped>300):
-                if self.vel.x>0:
-                    if keys[pygame.K_LEFT]:
-                        self.vel.x=self.vel.x*0.95
-                        if not self.jump_cancelled:
-                            self.facing_right=False
-                            self.jump_cancelled=True
-                elif self.vel.x<0:
-                    if keys[pygame.K_RIGHT]:
-                        self.vel.x=self.vel.x*0.9
-                        if not self.jump_cancelled:
-                            self.facing_right=True
-                            self.jump_cancelled=True
-                else:
-                    if keys[pygame.K_RIGHT]:
-                        self.vel.x=2
-                        # print(self.vel.x)
-                    else:
-                        self.vel.x=0
+                            if keys[pygame.K_RIGHT]:
+                                self.vel.x=2
+                                # print(self.vel.x)
+                            else:
+                                self.vel.x=0
 
-                    if keys[pygame.K_LEFT]:
-                        self.vel.x=-2
-                    else:
-                        if not keys[pygame.K_RIGHT]:
-                            self.vel.x=0
+                            if keys[pygame.K_LEFT]:
+                                self.vel.x=-2
+                            else:
+                                if not keys[pygame.K_RIGHT]:
+                                    self.vel.x=0
 
-        # print(self.vel.x, self.jump_cancelled)
+            # print(self.vel.x, self.jump_cancelled)
 
         if not self.on_ground:
             self.sliding=False
@@ -218,6 +234,9 @@ class Player(pygame.sprite.Sprite):
 
         keys = pygame.key.get_pressed()
 
+        if self.attacking:
+            return
+
         if self.dead:
             self.status='dead'
             return
@@ -261,12 +280,37 @@ class Player(pygame.sprite.Sprite):
         # print(self.status, self.touching_wall_r, self.touching_wall_l, self.vel.x)
 
     def animate(self):
+        print(self.status, self.next_attack, self.frame_index)
         animation = self.animations[self.status]
+
+        if self.attacking:
+            self.animation_speed=0.18
+        else:
+            self.animation_speed=0.10
 
         self.frame_index+=self.animation_speed
         if self.frame_index >= len(animation):
             if(self.status=='jump' or self.status=='dead'):
                 self.frame_index=len(animation)-1
+            elif(self.status=='attack1'):
+                if self.next_attack:
+                    self.status='attack2'
+                    self.next_attack=False
+                    self.frame_index=0
+                else:
+                    self.attacking=False
+                    self.frame_index=0
+            elif(self.status=='attack2'):
+                if self.next_attack:
+                    self.status='attack3'
+                    self.next_attack=False
+                    self.frame_index=0
+                else:
+                    self.attacking=False
+                    self.frame_index=0
+            elif(self.status=='attack3'):
+                self.attacking=False
+                self.frame_index=0
             else:
                 self.frame_index=0
 
