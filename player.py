@@ -39,7 +39,7 @@ class Player(pygame.sprite.Sprite):
         self.on_fp=False
         self.wj=False
         self.attacking=False
-        self.next_attack=False
+        self.can_attack=True
 
     def import_character_assets(self):
         character_path='./graphics/character/'
@@ -65,14 +65,18 @@ class Player(pygame.sprite.Sprite):
                     self.attacking=False
                     self.frame_index=0
                     self.status='idle'
+                if self.on_ground:
+                    self.vel.x=0
+                    self.acc.x=0
                 
         else:
-            if keys[pygame.K_SPACE]:
+            if keys[pygame.K_SPACE] and self.can_attack:
                 self.frame_index=0
                 self.status='attack1'
                 self.attacking=True
-                self.vel.x=0
-                self.acc.x=0
+                if self.on_ground:
+                    self.vel.x=0
+                    self.acc.x=0
             else:
                 
 
@@ -280,6 +284,11 @@ class Player(pygame.sprite.Sprite):
         # print(self.touching_wall_r)
 
         # print(self.status, self.touching_wall_r, self.touching_wall_l, self.vel.x)
+
+        if self.status=='slide' or self.status=='wall_slide':
+            self.can_attack=False
+        else:
+            self.can_attack=True
 
     def animate(self):
         # print(self.status, self.next_attack, self.frame_index)
