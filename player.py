@@ -16,7 +16,7 @@ class Player(pygame.sprite.Sprite):
         self.vel = pygame.math.Vector2(0, 0)
         self.acc = pygame.math.Vector2(0, 0)
         self.walkspeed=3
-        self.runacc=0.1
+        self.runacc=0.2
         self.rundec=0.2
         self.runspeed=8
         self.prev_x_vel=0
@@ -45,7 +45,7 @@ class Player(pygame.sprite.Sprite):
         character_path='./graphics/character/'
         self.animations={'idle':[], 'walk':[], 'jump':[], 'fall':[], 'wall_slide':[], 'run':[], 'slide':[], 'dead':[], 'attack1':[], 'attack2':[], 'attack3':[]}
         cx={'idle':14, 'jump':17, 'walk':21, 'fall':17, 'wall_slide':15, 'run': 17, 'slide':9, 'dead':4, 'attack1':0, 'attack2':0, 'attack3':0}
-        cy={'idle':6, 'jump':7, 'walk':7, 'fall':1, 'wall_slide':3, 'run':7, 'slide':19, 'dead':7, 'attack1':0, 'attack2':0, 'attack3':0}
+        cy={'idle':6, 'jump':7, 'walk':7, 'fall':1, 'wall_slide':3, 'run':7, 'slide':19, 'dead':7, 'attack1':6 ,'attack2':0, 'attack3':0}
         w={'idle':19, 'jump':19, 'walk':19, 'fall':19, 'wall_slide':19, 'run': 19, 'slide':31, 'dead':29, 'attack1':50, 'attack2':50, 'attack3':50}
         h={'idle':30, 'jump':30, 'walk':30, 'fall':30, 'wall_slide':30, 'run': 30, 'slide':18, 'dead':29, 'attack1':37, 'attack2':37, 'attack3':37}
 
@@ -60,17 +60,19 @@ class Player(pygame.sprite.Sprite):
             return
 
         if self.attacking:    #attack handling
-            if self.status=='attack1' and self.frame_index>2:
-                if keys[pygame.K_SPACE]:
-                    self.next_attack=True
-            elif self.status=='attack2' and self.frame_index>2:
-                if keys[pygame.K_SPACE]:
-                    self.next_attack=True
+            if self.status=='attack1':
+                if (self.facing_right and keys[pygame.K_LEFT]) or (not self.facing_right and keys[pygame.K_RIGHT]):
+                    self.attacking=False
+                    self.frame_index=0
+                    self.status='idle'
+                
         else:
             if keys[pygame.K_SPACE]:
                 self.frame_index=0
                 self.status='attack1'
                 self.attacking=True
+                self.vel.x=0
+                self.acc.x=0
             else:
                 
 
@@ -280,11 +282,12 @@ class Player(pygame.sprite.Sprite):
         # print(self.status, self.touching_wall_r, self.touching_wall_l, self.vel.x)
 
     def animate(self):
-        print(self.status, self.next_attack, self.frame_index)
+        # print(self.status, self.next_attack, self.frame_index)
         animation = self.animations[self.status]
+        keys=pygame.key.get_pressed()
 
         if self.attacking:
-            self.animation_speed=0.18
+            self.animation_speed=0.15
         else:
             self.animation_speed=0.10
 
@@ -293,22 +296,7 @@ class Player(pygame.sprite.Sprite):
             if(self.status=='jump' or self.status=='dead'):
                 self.frame_index=len(animation)-1
             elif(self.status=='attack1'):
-                if self.next_attack:
-                    self.status='attack2'
-                    self.next_attack=False
-                    self.frame_index=0
-                else:
-                    self.attacking=False
-                    self.frame_index=0
-            elif(self.status=='attack2'):
-                if self.next_attack:
-                    self.status='attack3'
-                    self.next_attack=False
-                    self.frame_index=0
-                else:
-                    self.attacking=False
-                    self.frame_index=0
-            elif(self.status=='attack3'):
+                self.status='idle'
                 self.attacking=False
                 self.frame_index=0
             else:

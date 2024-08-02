@@ -650,7 +650,7 @@ class Level:
 
         keys=pygame.key.get_pressed()
         t=pygame.time.get_ticks()
-        if keys[pygame.K_RSHIFT] and (t-self.pause_start>500):
+        if keys[pygame.K_RSHIFT] and (t-self.pause_start>300):
             self.paused=not self.paused
             self.pause_start=pygame.time.get_ticks()
 
@@ -687,14 +687,14 @@ class Level:
             self.scroll_y()
             self.y_collisions()
 
-        if player.attacking:
-            player.rect.y-=12
-        elif player.sliding:
+        # if player.attacking:
+        #     player.rect.y-=12
+        if player.sliding:
             player.rect.y+=25
         self.player.draw(self.display_surface)
-        if player.attacking:
-            player.rect.y+=12
-        elif player.sliding:
+        # if player.attacking:
+        #     player.rect.y+=12
+        if player.sliding:
             player.rect.y-=25
 
         if not self.paused:
