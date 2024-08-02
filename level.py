@@ -700,7 +700,7 @@ class Level:
         if not self.paused:
             self.time+=1
 
-        if player.dead or player.coords.y+player.rect.height>level_height:
+        if (player.dead and player.frame_index>=6 )or player.coords.y+player.rect.height>level_height:
             self.reset()        
 
         # print(player.coords)

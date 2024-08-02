@@ -14,6 +14,9 @@ class Ninja(pygame.sprite.Sprite):
         self.status='idle'
         self.idle_timer=0
         self.facing_right=False
+        self.attacking=False
+        self.has_attacked=False
+        self.health=10
 
     def import_character_assets(self):
         character_path='./graphics/ninja/'
@@ -28,10 +31,14 @@ class Ninja(pygame.sprite.Sprite):
 
         self.frame_index+=self.animation_speed
         if self.frame_index >= len(animation):
-            if(self.status=='attack'):
+            if self.status=='dead':
+                self.frame_index=len(animation)-1
+            elif(self.status=='attack'):
                 self.status='idle'
                 self.frame_index=0
                 self.idle_timer=pygame.time.get_ticks()
+                self.attacking=False
+                self.has_attacked=False
             else:
                 self.frame_index=0
 
@@ -42,9 +49,20 @@ class Ninja(pygame.sprite.Sprite):
             flipped_image=pygame.transform.flip(image, True, False)
             self.image=flipped_image
 
+        # print(self.frame_index, self.status, len(animation))
+
 
     def update(self, player):
         t=pygame.time.get_ticks()
+
+        if self.status=='dead':
+            return
+
+        if self.health<=0:
+            self.status='dead'
+            self.frame_index=0
+            self.animation_speed=0.15
+            return
         if self.status=='idle' and t-self.idle_timer>500:
             self.frame_index=0
             self.status='walk'
@@ -68,6 +86,7 @@ class Ninja(pygame.sprite.Sprite):
                         self.frame_index=0
                         self.vel.x=0
                         self.status='attack'
+                        self.attacking=True
             else:
                 if player.rect.centerx>self.rect.centerx:
                     self.frame_index=0
@@ -79,12 +98,39 @@ class Ninja(pygame.sprite.Sprite):
                         self.frame_index=0
                         self.vel.x=0
                         self.status='attack'
+                        self.attacking=True
 
         self.pos.x+=self.vel.x
         self.rect.x=int(self.pos.x)
         # print(self.rect.x,self.rect.x+self.rect.width, player.rect.x, player.rect.x+player.rect.width)
 
+    def handle_player_collisions(self, player):
+        if self.attacking and self.frame_index>=7 and self.frame_index<11:
+            if self.facing_right:
+                if ((player.rect.x+player.rect.width)>=(self.rect.x+104)) and (player.rect.x<=self.rect.x+236) and player.rect.top<=self.rect.bottom-62 and player.rect.bottom>=self.rect.top+122 and not self.has_attacked:
+                    player.health-=20
+                    self.has_attacked=True
+                    print('a')
+            else:
+                if ((player.rect.x+player.rect.width)>=(self.rect.x+20)) and (player.rect.x<=self.rect.x+152) and player.rect.top<=self.rect.bottom-62 and player.rect.bottom>=self.rect.top+122 and not self.has_attacked:
+                    player.health-=20
+                    self.has_attacked=True
+                    print('b')
+
+        if player.attacking and ((player.rect.x+62)>=(self.rect.x+20)) and (player.rect.x<=self.rect.x+152) and player.rect.top<=self.rect.bottom-62 and player.rect.bottom>=self.rect.top+122 and not self.has_attacked:
+            if player.frame_index>=2 and player.frame_index<3 and not player.first_hit:                
+                    self.health-=20
+                    player.first_hit=True
+            elif player.frame_index>=6 and player.frame_index<7 and not player.sec_hit:                
+                    self.health-=20
+                    player.sec_hit=True
+            elif player.frame_index>=10 and player.frame_index<11 and not player.third_hit:                
+                    self.health-=20
+                    player.third_hit=True
+               
+        # print(player.health, self.health)
     def run(self, player):
         self.update(player)
+        self.handle_player_collisions(player)
         self.animate()
 

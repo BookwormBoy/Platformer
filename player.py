@@ -21,6 +21,7 @@ class Player(pygame.sprite.Sprite):
         self.runspeed=8
         self.prev_x_vel=0
         self.wall_jumped=-501
+        self.health=100
 
         self.on_ground = True
         self.status='idle'
@@ -40,13 +41,16 @@ class Player(pygame.sprite.Sprite):
         self.wj=False
         self.attacking=False
         self.can_attack=True
+        self.first_hit=False
+        self.sec_hit=False
+        self.third_hit=False
 
     def import_character_assets(self):
         character_path='./graphics/character/'
         self.animations={'idle':[], 'walk':[], 'jump':[], 'fall':[], 'wall_slide':[], 'run':[], 'slide':[], 'dead':[], 'attack1':[], 'attack2':[], 'attack3':[]}
-        cx={'idle':14, 'jump':17, 'walk':21, 'fall':17, 'wall_slide':15, 'run': 17, 'slide':9, 'dead':4, 'attack1':0, 'attack2':0, 'attack3':0}
+        cx={'idle':14, 'jump':17, 'walk':21, 'fall':17, 'wall_slide':15, 'run': 17, 'slide':9, 'dead':4, 'attack1':13, 'attack2':0, 'attack3':0}
         cy={'idle':6, 'jump':7, 'walk':7, 'fall':1, 'wall_slide':3, 'run':7, 'slide':19, 'dead':7, 'attack1':6 ,'attack2':0, 'attack3':0}
-        w={'idle':19, 'jump':19, 'walk':19, 'fall':19, 'wall_slide':19, 'run': 19, 'slide':31, 'dead':29, 'attack1':50, 'attack2':50, 'attack3':50}
+        w={'idle':19, 'jump':19, 'walk':19, 'fall':19, 'wall_slide':19, 'run': 19, 'slide':31, 'dead':29, 'attack1':31, 'attack2':50, 'attack3':50}
         h={'idle':30, 'jump':30, 'walk':30, 'fall':30, 'wall_slide':30, 'run': 30, 'slide':18, 'dead':29, 'attack1':37, 'attack2':37, 'attack3':37}
 
 
@@ -65,6 +69,10 @@ class Player(pygame.sprite.Sprite):
                     self.attacking=False
                     self.frame_index=0
                     self.status='idle'
+                    self.first_hit=False
+                    self.sec_hit=False
+                    self.third_hit=False
+
                 if self.on_ground:
                     self.vel.x=0
                     self.acc.x=0
@@ -242,6 +250,9 @@ class Player(pygame.sprite.Sprite):
 
         if self.attacking:
             return
+    
+        if self.health<=0:
+            self.dead=True
 
         if self.dead:
             self.status='dead'
