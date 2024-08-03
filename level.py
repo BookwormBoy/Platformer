@@ -57,6 +57,7 @@ class Level:
         self.on_flames=pygame.sprite.Group()
         self.checkpoints=pygame.sprite.Group()
         self.ninja=pygame.sprite.GroupSingle()
+        self.falling_spikes=pygame.sprite.Group()
         for row_index,row in enumerate(layout):
             for col_index, cell in enumerate(row):
                 x=tile_size*col_index+self.offset_x
@@ -640,6 +641,25 @@ class Level:
 
         # print(self.offset_x, self.offset_y)
 
+    def handle_falling_spikes(self):
+        player=self.player.sprite
+        if self.time%300==0:
+            fs=Falling_Spike((player.rect.x, 0), 64)
+            self.falling_spikes.add(fs)
+
+        for fs in self.falling_spikes.sprites():
+            fs.update()
+            if fs.rect.colliderect(player.rect):
+                player.health-=10
+
+            for tile in self.tiles.sprites():
+                if fs.rect.colliderect(tile.rect):
+                    pygame.sprite.Sprite.kill(fs)
+
+
+
+        
+
     def reset(self):
         self.setup_level(self.level_data)
   
@@ -669,6 +689,7 @@ class Level:
             self.handle_shells()
             self.handle_flames()
             self.handle_checkpoints()
+            self.handle_falling_spikes()
             if len(self.ninja)==1:
                 ninja.run(player)
 
@@ -676,6 +697,7 @@ class Level:
         self.shells.draw(self.display_surface)
         self.on_flames.draw(self.display_surface)
         self.checkpoints.draw(self.display_surface)
+        self.falling_spikes.draw(self.display_surface)
         if len(self.ninja)==1:
             self.ninja.draw(self.display_surface)
 
