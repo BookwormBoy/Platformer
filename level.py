@@ -689,7 +689,7 @@ class Level:
             self.handle_shells()
             self.handle_flames()
             self.handle_checkpoints()
-            self.handle_falling_spikes()
+            # self.handle_falling_spikes()
             if len(self.ninja)==1:
                 ninja.run(player)
 
@@ -702,7 +702,7 @@ class Level:
             self.ninja.draw(self.display_surface)
 
         if not self.paused:
-            self.player.update()
+            self.player.update(ninja)
             self.scroll_x()
             self.x_collisions() 
             

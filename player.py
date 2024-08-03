@@ -319,6 +319,9 @@ class Player(pygame.sprite.Sprite):
                 self.status='idle'
                 self.attacking=False
                 self.frame_index=0
+                self.first_hit=False
+                self.sec_hit=False
+                self.third_hit=False
             else:
                 self.frame_index=0
 
@@ -330,10 +333,34 @@ class Player(pygame.sprite.Sprite):
             self.image=flipped_image
 
        
+    def find_damage(self, enemy):
+        # print('h')
+        if self.frame_index>=2 and self.frame_index<3 and not self.first_hit:                
+            enemy.health-=10
+            self.first_hit=True
+        elif self.frame_index>=6 and self.frame_index<7 and not self.sec_hit:                
+            enemy.health-=10
+            self.sec_hit=True
+        elif self.frame_index>=10 and self.frame_index<11 and not self.third_hit:                
+            enemy.health-=10
+            self.third_hit=True
+    def handle_enemy_collisions(self, enemy):
+        # print(self.rect.x, enemy.rect.x)
+        if self.attacking:
+            if enemy.facing_right:
+                if self.rect.x+62>=enemy.rect.x+96 and self.rect.x<=enemy.rect.x+148 and self.rect.top<=enemy.rect.bottom-62 and self.rect.bottom>=enemy.rect.top+122:
+                    self.find_damage(enemy)
+            else:
+                if self.rect.x+62>=enemy.rect.x+108 and self.rect.x<=enemy.rect.x+160 and self.rect.top<=enemy.rect.bottom-62 and self.rect.bottom>=enemy.rect.top+122:
+                    self.find_damage(enemy)
+           
 
-    def update(self):
+          
+
+    def update(self, enemy):
         self.prev_x_vel=self.vel.x
         self.get_input()
+        self.handle_enemy_collisions(enemy)
         self.get_status()
         self.animate()
         self.slide_rect = (self.rect.x, self.rect.y+12, self.rect.width+12, self.rect.height-12)

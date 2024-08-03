@@ -16,7 +16,7 @@ class Ninja(pygame.sprite.Sprite):
         self.facing_right=False
         self.attacking=False
         self.has_attacked=False
-        self.health=10
+        self.health=100
 
     def import_character_assets(self):
         character_path='./graphics/ninja/'
@@ -108,25 +108,16 @@ class Ninja(pygame.sprite.Sprite):
         if self.attacking and self.frame_index>=7 and self.frame_index<11:
             if self.facing_right:
                 if ((player.rect.x+player.rect.width)>=(self.rect.x+104)) and (player.rect.x<=self.rect.x+236) and player.rect.top<=self.rect.bottom-62 and player.rect.bottom>=self.rect.top+122 and not self.has_attacked:
-                    player.health-=20
+                    player.health-=1
                     self.has_attacked=True
-                    print('a')
+                    # print('a')
             else:
                 if ((player.rect.x+player.rect.width)>=(self.rect.x+20)) and (player.rect.x<=self.rect.x+152) and player.rect.top<=self.rect.bottom-62 and player.rect.bottom>=self.rect.top+122 and not self.has_attacked:
-                    player.health-=20
+                    player.health-=1
                     self.has_attacked=True
-                    print('b')
+                    # print('b')
 
-        if player.attacking and ((player.rect.x+62)>=(self.rect.x+20)) and (player.rect.x<=self.rect.x+152) and player.rect.top<=self.rect.bottom-62 and player.rect.bottom>=self.rect.top+122 and not self.has_attacked:
-            if player.frame_index>=2 and player.frame_index<3 and not player.first_hit:                
-                    self.health-=20
-                    player.first_hit=True
-            elif player.frame_index>=6 and player.frame_index<7 and not player.sec_hit:                
-                    self.health-=20
-                    player.sec_hit=True
-            elif player.frame_index>=10 and player.frame_index<11 and not player.third_hit:                
-                    self.health-=20
-                    player.third_hit=True
+        
                
         # print(player.health, self.health)
     def run(self, player):
