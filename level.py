@@ -46,8 +46,9 @@ class Level:
                     x=col_index*tile_size
                     y=row_index*tile_size
                     if type == 'terrain':
-                        sprite = Tile((x,y), (x-self.offset_x,y-self.offset_y), tile_size)
-                        # if val=='25':print(x, y, row_index, col_index)
+                        terrain_tile_list = import_cut_graphics('./graphics/terrain/terrain_tiles.png', 16)
+                        tile_surface = terrain_tile_list[int(val)]
+                        sprite = Tile((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
                         sprite_group.add(sprite)
 
         return sprite_group 
@@ -132,15 +133,9 @@ class Level:
                     self.ninja.add(ninja)
 
         terrain_layout = import_csv_layout(level_csv['terrain'])
-        # print(len(terrain_layout))
-        # for i in range(0, 120):
-        #     for j in range(0, 80):
-        #         print(terrain_layout[i][j], end=' ')
-        #     print('')
         self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain')
         for t in self.terrain_sprites.sprites():
             self.tiles.add(t)
-        # print(level_width, level_height)
 
 
     def scroll_x(self):
