@@ -1,5 +1,6 @@
 from os import walk
 import pygame
+from csv import reader
 def import_folder(path, cx, cy, w, h):
     surface_list=[]
     for _,__,img_files in walk(path):
@@ -17,3 +18,10 @@ def import_folder(path, cx, cy, w, h):
 
 #import_folder('/home/siddharth-kini/PythonCode/Practice/graphics/idle')
 
+def import_csv_layout(path):
+    terrain_map=[]
+    with open(path) as map:
+        level=reader(map, delimiter=',')
+        for row in level:
+            terrain_map.append(list(row))
+        return terrain_map

@@ -213,7 +213,7 @@ class Player(pygame.sprite.Sprite):
                 self.wj=True
                 self.facing_right=not self.facing_right
             elif self.touching_wall_l:
-                self.vel.x=-10
+                self.vel.x=10
                 self.jump_cancelled=False
                 self.facing_right=not self.facing_right
         
@@ -345,6 +345,8 @@ class Player(pygame.sprite.Sprite):
             enemy.health-=10
             self.third_hit=True
     def handle_enemy_collisions(self, enemy):
+        if enemy==None:
+            return
         # print(self.rect.x, enemy.rect.x)
         if self.attacking:
             if enemy.facing_right:

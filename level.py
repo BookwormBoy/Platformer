@@ -5,16 +5,17 @@ from settings import *
 from enemies import *
 
 class Level:
-    def __init__(self, level_data, surface):
+    def __init__(self, level_data, level_csv, surface):
         self.display_surface = surface
         self.offset_x=0
         self.offset_y=0
         self.player_start_x=0
         self.player_start_y=0
-        self.setup_level(level_data)
+        self.setup_level(level_data, level_csv)
         self.shift_x = 0
         self.shift_y = 0
         self.level_data=level_data
+        self.level_csv=level_csv
 
         self.shifted=False
         self.start_ypos=0
@@ -34,9 +35,25 @@ class Level:
 
         self.right_calibration=level_width
         self.left_calibration=0
+
+        
+    def create_tile_group(self,layout, type):
+        sprite_group = pygame.sprite.Group()
+
+        for row_index, row in enumerate(layout):
+            for col_index, val in enumerate(row):
+                if val!= '-1':
+                    x=col_index*tile_size
+                    y=row_index*tile_size
+                    if type == 'terrain':
+                        sprite = Tile((x,y), (x-self.offset_x,y-self.offset_y), tile_size)
+                        # if val=='25':print(x, y, row_index, col_index)
+                        sprite_group.add(sprite)
+
+        return sprite_group 
        
     
-    def setup_level(self, layout ):
+    def setup_level(self, layout, level_csv ):
         self.right_calibration=level_width+self.offset_x
         self.left_calibration=0+self.offset_x
         self.tiles = pygame.sprite.Group()
@@ -113,6 +130,17 @@ class Level:
                 elif cell == 'I':
                     ninja=Ninja((x, y-128))
                     self.ninja.add(ninja)
+
+        terrain_layout = import_csv_layout(level_csv['terrain'])
+        # print(len(terrain_layout))
+        # for i in range(0, 120):
+        #     for j in range(0, 80):
+        #         print(terrain_layout[i][j], end=' ')
+        #     print('')
+        self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain')
+        for t in self.terrain_sprites.sprites():
+            self.tiles.add(t)
+        # print(level_width, level_height)
 
 
     def scroll_x(self):
@@ -661,7 +689,7 @@ class Level:
         
 
     def reset(self):
-        self.setup_level(self.level_data)
+        self.setup_level(self.level_data, self.level_csv)
   
 
     def run(self):
@@ -683,6 +711,7 @@ class Level:
             tile.change_sprite(self.on)
 
         self.tiles.draw(self.display_surface)
+        # self.terrain_sprites.draw(self.display_surface)
 
         if not self.paused:
             self.shoot_canon()
@@ -708,6 +737,7 @@ class Level:
             
             self.scroll_y()
             self.y_collisions()
+        # print(player.coords.y)
 
         # if player.attacking:
         #     player.rect.y-=12
