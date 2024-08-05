@@ -62,6 +62,10 @@ class Level:
                         tile_surface=pygame.image.load('./graphics/terrain/falling_platform.png')
                         tile_surface=pygame.transform.scale(tile_surface, (tile_surface.get_size()[0]*1.5, tile_surface.get_size()[1]*1.5))
                         sprite = Falling_Platform((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
+                    elif tile_type=='spikes':
+                        tile_surface=pygame.image.load('./graphics/terrain/spike.png')
+                        tile_surface=pygame.transform.scale(tile_surface, (tile_surface.get_size()[0]*2, tile_surface.get_size()[1]*2))
+                        sprite = Spike((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
                     sprite_group.add(sprite)
 
         return sprite_group 
@@ -160,6 +164,10 @@ class Level:
         falling_platform_layout = import_csv_layout(level_csv['falling_platforms'])
         self.falling_platforms = self.create_tile_group(falling_platform_layout, 'fp', 'fp')
         self.tiles.add(self.falling_platforms)
+
+        falling_platform_layout = import_csv_layout(level_csv['spikes'])
+        self.spikes = self.create_tile_group(falling_platform_layout, 'spikes', 'spikes')
+        self.tiles.add(self.spikes)
 
 
     def scroll_x(self):

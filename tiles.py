@@ -157,9 +157,8 @@ class Falling_Platform(Tile):
             self.rect.y=int(self.pos.y)
 
 class Spike(Tile):
-    def __init__(self, pos, coords,size):
-        super().__init__(pos, coords,size)
-        self.image.fill('red')
+    def __init__(self, pos, coords,surface):
+        super().__init__(pos, coords,surface)
 
 class Firejet(Tile):
     def __init__(self, pos, coords,size):
