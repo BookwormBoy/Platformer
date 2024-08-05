@@ -37,21 +37,26 @@ class Level:
         self.left_calibration=0
 
         
-    def create_tile_group(self,layout, sheet,type):
+    def create_tile_group(self,layout, sheet, tile_type):
         sprite_group = pygame.sprite.Group()
         if sheet == 'terrain':
             terrain_tile_list = import_cut_graphics('./graphics/terrain/terrain_tiles.png', 16)
+
         for row_index, row in enumerate(layout):
             for col_index, val in enumerate(row):
                 if val!= '-1':
                     x=col_index*tile_size
                     y=row_index*tile_size
                     
-                    tile_surface = terrain_tile_list[int(val)]
-                    if type=='terrain':
+                    if tile_type=='terrain':
+                        tile_surface = terrain_tile_list[int(val)]
                         sprite = Tile((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
-                    elif type=='bg':
+                    elif tile_type=='bg':
+                        tile_surface = terrain_tile_list[int(val)]
                         sprite = Bg_Tile((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
+                    elif tile_type=='hmp':
+                        tile_surface=pygame.image.load('./graphics/terrain/h_moving_platform.png')
+                        sprite = H_Moving_Platform((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
                     sprite_group.add(sprite)
 
         return sprite_group 
@@ -114,7 +119,6 @@ class Level:
                 elif cell == 'L':
                     tile=Shell((x, y),(x-self.offset_x, y-self.offset_y))
                     self.shells.add(tile)
-                    print(len(self.shells))
                 elif cell == 'J':
                     tile = Falling_Platform((x, y), (x-self.offset_x, y-self.offset_y), tile_size)
                     self.tiles.add(tile)
@@ -143,6 +147,11 @@ class Level:
         bg_layout = import_csv_layout(level_csv['bg'])
         self.bg_sprites = self.create_tile_group(bg_layout, 'terrain', 'bg')
         self.tiles.add(self.bg_sprites)
+
+        hmp_layout = import_csv_layout(level_csv['h_moving_platforms'])
+        self.h_moving_platforms=self.create_tile_group(hmp_layout, 'hmp', 'hmp')
+        print(len(self.h_moving_platforms))
+        self.tiles.add(self.h_moving_platforms)
 
 
     def scroll_x(self):

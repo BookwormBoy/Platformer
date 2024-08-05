@@ -28,11 +28,8 @@ class Bg_Tile(Tile):
         super().__init__(pos, coords, surface)
 
 class H_Moving_Platform(Tile):
-    def __init__(self, pos,coords, size):
-        super().__init__(pos,coords, size)
-        self.image = pygame.Surface((size*3, size))
-        self.image.fill('blue')
-        self.rect=self.image.get_rect(topleft = pos)
+    def __init__(self, pos,coords, surface):
+        super().__init__(pos,coords, surface)
         self.w=0.003
         self.amp=1000
     
