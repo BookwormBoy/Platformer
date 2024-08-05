@@ -23,6 +23,10 @@ class Tile(pygame.sprite.Sprite):
         self.rect.x = int(self.pos.x)
         self.rect.y = int(self.pos.y)
 
+class Bg_Tile(Tile):
+    def __init__(self, pos, coords, surface):
+        super().__init__(pos, coords, surface)
+
 class H_Moving_Platform(Tile):
     def __init__(self, pos,coords, size):
         super().__init__(pos,coords, size)

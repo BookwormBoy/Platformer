@@ -37,19 +37,22 @@ class Level:
         self.left_calibration=0
 
         
-    def create_tile_group(self,layout, type):
+    def create_tile_group(self,layout, sheet,type):
         sprite_group = pygame.sprite.Group()
-
+        if sheet == 'terrain':
+            terrain_tile_list = import_cut_graphics('./graphics/terrain/terrain_tiles.png', 16)
         for row_index, row in enumerate(layout):
             for col_index, val in enumerate(row):
                 if val!= '-1':
                     x=col_index*tile_size
                     y=row_index*tile_size
-                    if type == 'terrain':
-                        terrain_tile_list = import_cut_graphics('./graphics/terrain/terrain_tiles.png', 16)
-                        tile_surface = terrain_tile_list[int(val)]
+                    
+                    tile_surface = terrain_tile_list[int(val)]
+                    if type=='terrain':
                         sprite = Tile((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
-                        sprite_group.add(sprite)
+                    elif type=='bg':
+                        sprite = Bg_Tile((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
+                    sprite_group.add(sprite)
 
         return sprite_group 
        
@@ -133,9 +136,13 @@ class Level:
                     self.ninja.add(ninja)
 
         terrain_layout = import_csv_layout(level_csv['terrain'])
-        self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain')
+        self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain', 'terrain')
         for t in self.terrain_sprites.sprites():
             self.tiles.add(t)
+
+        bg_layout = import_csv_layout(level_csv['bg'])
+        self.bg_sprites = self.create_tile_group(bg_layout, 'terrain', 'bg')
+        self.tiles.add(self.bg_sprites)
 
 
     def scroll_x(self):
@@ -277,7 +284,7 @@ class Level:
                         # print('cx', tile.rect.x, player.rect.x, tile.rect.y, player.rect.y)
                         player.dead=True
                 else:
-                    if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True) or tile.__class__==Falling_Platform:
+                    if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True) or tile.__class__==Falling_Platform or tile.__class__==Bg_Tile:
                         pass
                     else:
                         if vel<0:
@@ -451,7 +458,7 @@ class Level:
                         self.fp_speed=tile.vel.y
                         # print(self.fp_speed)
 
-                if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True) or tile.__class__==Falling_Platform:
+                if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True) or tile.__class__==Falling_Platform or tile.__class__==Bg_Tile:
                         pass
                 # print('c')
                 else:
@@ -706,7 +713,7 @@ class Level:
             tile.change_sprite(self.on)
 
         self.tiles.draw(self.display_surface)
-        # self.terrain_sprites.draw(self.display_surface)
+        self.bg_sprites.draw(self.display_surface)
 
         if not self.paused:
             self.shoot_canon()
