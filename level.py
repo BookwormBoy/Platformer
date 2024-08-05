@@ -56,7 +56,12 @@ class Level:
                         sprite = Bg_Tile((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
                     elif tile_type=='hmp':
                         tile_surface=pygame.image.load('./graphics/terrain/h_moving_platform.png')
+                        tile_surface=pygame.transform.scale(tile_surface, (tile_surface.get_size()[0]*1.5, tile_surface.get_size()[1]*1.5))
                         sprite = H_Moving_Platform((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
+                    elif tile_type=='fp':
+                        tile_surface=pygame.image.load('./graphics/terrain/falling_platform.png')
+                        tile_surface=pygame.transform.scale(tile_surface, (tile_surface.get_size()[0]*1.5, tile_surface.get_size()[1]*1.5))
+                        sprite = Falling_Platform((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
                     sprite_group.add(sprite)
 
         return sprite_group 
@@ -150,8 +155,11 @@ class Level:
 
         hmp_layout = import_csv_layout(level_csv['h_moving_platforms'])
         self.h_moving_platforms=self.create_tile_group(hmp_layout, 'hmp', 'hmp')
-        print(len(self.h_moving_platforms))
         self.tiles.add(self.h_moving_platforms)
+
+        falling_platform_layout = import_csv_layout(level_csv['falling_platforms'])
+        self.falling_platforms = self.create_tile_group(falling_platform_layout, 'fp', 'fp')
+        self.tiles.add(self.falling_platforms)
 
 
     def scroll_x(self):
@@ -189,28 +197,32 @@ class Level:
         self.shift_y=0
 
         player = self.player.sprite
+        if player.on_fp:
+            vel=self.fp_speed
+        else:
+            vel=player.vel.y
 
-        if player.pos.y<screen_height/3 and player.vel.y<0 and player.coords.y>screen_height/3:
-            self.shift_y = -player.vel.y
+        if player.pos.y<screen_height/3 and vel<0 and player.coords.y>screen_height/3:
+            self.shift_y = -vel
             player.pos.y += self.shift_y
             if not self.shifted:
                 self.start_ypos = player.coords.y
             self.shifted=True
-        elif player.pos.y > 2*screen_height/3 and player.vel.y>0 and player.coords.y<level_height-screen_width/3:
-            self.shift_y = -player.vel.y 
+        elif player.pos.y > 2*screen_height/3 and vel>0 and player.coords.y<level_height-screen_width/3:
+            self.shift_y = -vel 
             player.pos.y += self.shift_y
             self.shifted=True
         else:
-            if(player.vel.y<0):
+            if(vel<0):
                 if(self.shifted and ((not player.on_ground) and (player.coords.y<self.start_ypos))):
-                    self.shift_y = -player.vel.y
+                    self.shift_y = -vel
                     player.pos.y += self.shift_y
                 else:
                     self.shift_y=0
                     self.shifted=False
             else:
                 if(self.shifted and ((not player.on_ground) and (player.coords.y>self.start_ypos))):
-                    self.shift_y = -player.vel.y
+                    self.shift_y = -vel
                     player.pos.y += self.shift_y
                 else:
                     self.shift_y=0
@@ -597,6 +609,7 @@ class Level:
 
         if player.on_fp and f==0:
             player.on_fp=False
+            self.fp_speed=0
                 
 
         # print('ycol', player.vel)

@@ -145,9 +145,8 @@ class Shell(pygame.sprite.Sprite):
         self.rect.y=int(self.pos.y)
 
 class Falling_Platform(Tile):
-    def __init__(self, pos, coords,size):
-        super().__init__(pos,coords, size)
-        self.image.fill('blue')
+    def __init__(self, pos, coords,surface):
+        super().__init__(pos,coords, surface)
         self.triggered=False
 
     def move(self):
