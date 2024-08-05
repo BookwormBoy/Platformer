@@ -3,5 +3,6 @@ level_0={
     'bg':'./levels/0/level_0_bg.csv',
     'h_moving_platforms': './levels/0/level_0_h_moving_platforms.csv',
     'falling_platforms': './levels/0/level_0_falling_platforms.csv',
-    'spikes': './levels/0/level_0_spikes.csv'
+    'spikes': './levels/0/level_0_spikes.csv',
+    'canons': './levels/0/level_0_canons.csv',
 }

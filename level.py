@@ -66,6 +66,10 @@ class Level:
                         tile_surface=pygame.image.load('./graphics/terrain/spike.png')
                         tile_surface=pygame.transform.scale(tile_surface, (tile_surface.get_size()[0]*2, tile_surface.get_size()[1]*2))
                         sprite = Spike((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
+                    elif tile_type=='canon':
+                        tile_surface=pygame.image.load('./graphics/terrain/canon.png')
+                        # tile_surface=pygame.transform.scale(tile_surface, (tile_surface.get_size()[0]*2, tile_surface.get_size()[1]*2))
+                        sprite = Canon((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
                     sprite_group.add(sprite)
 
         return sprite_group 
@@ -168,6 +172,10 @@ class Level:
         falling_platform_layout = import_csv_layout(level_csv['spikes'])
         self.spikes = self.create_tile_group(falling_platform_layout, 'spikes', 'spikes')
         self.tiles.add(self.spikes)
+
+        canon_layout = import_csv_layout(level_csv['canons'])
+        self.canons = self.create_tile_group(canon_layout, 'canon', 'canon')
+        self.tiles.add(self.canons)
 
 
     def scroll_x(self):
@@ -644,7 +652,9 @@ class Level:
     def shoot_canon(self):
         for canon in self.canons:
             if self.time%canon.freq==0:
-                bullet=Bullet((canon.rect.x, canon.rect.y-10), 30)
+                bullet_surface=pygame.image.load('./graphics/terrain/bullet.png')
+                bullet_surface=pygame.transform.scale(bullet_surface, (32, 32))
+                bullet=Bullet((canon.rect.x, canon.rect.y-10),(canon.rect.x-self.offset_x, canon.rect.y-10-self.offset_y), bullet_surface)
                 self.bullets.add(bullet)
                 self.tiles.add(bullet)
 

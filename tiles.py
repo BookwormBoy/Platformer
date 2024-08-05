@@ -41,19 +41,13 @@ class H_Moving_Platform(Tile):
         # print(self.rect.x)
 
 class Canon(Tile):
-    def __init__(self, pos, coords,size):
-        super().__init__(pos, coords,size)
-        self.image = pygame.Surface((size, size))
-        self.image.fill('blue')
+    def __init__(self, pos, coords,surface):
+        super().__init__(pos, coords,surface)
         self.freq=120
 
 class Bullet(Tile):
-    def __init__(self, pos,coords, size):
-        super().__init__(pos, coords, size)
-        self.image = pygame.Surface((30, 10))
-        self.image.fill('green')
-        self.rect=self.image.get_rect(topleft=pos)
-
+    def __init__(self, pos,coords, surface):
+        super().__init__(pos, coords, surface)
         self.bounced_on=False
 
     def move_x(self):
