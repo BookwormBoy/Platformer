@@ -216,6 +216,8 @@ class Player(pygame.sprite.Sprite):
                 self.vel.x=10
                 self.jump_cancelled=False
                 self.facing_right=not self.facing_right
+                self.wj=True
+                self.wall_jumped=pygame.time.get_ticks()
         
 
         # print(self.acc.x, self.vel.x)
