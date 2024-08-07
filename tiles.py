@@ -182,14 +182,13 @@ class Flame(pygame.sprite.Sprite):
         self.rect.y=int(self.pos.y)
 
 class Checkpoint(pygame.sprite.Sprite):
-    def __init__(self, pos, coords,size):
+    def __init__(self, pos, coords,surface):
         super().__init__()
-        self.image = pygame.Surface((size, size))
+        self.image = surface
         self.rect=self.image.get_rect(topleft = pos)
 
         self.pos = pygame.math.Vector2(self.rect.x, self.rect.y)
         self.coords = pygame.math.Vector2(coords[0], coords[1])
-        self.image.fill('blue')
 
     def move_x(self, shift):
         self.pos.x+=shift

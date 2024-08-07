@@ -42,6 +42,7 @@ class Level:
         if sheet == 'terrain':
             terrain_tile_list = import_cut_graphics('./graphics/terrain/terrain_tiles.png', 16)
 
+
         for row_index, row in enumerate(layout):
             for col_index, val in enumerate(row):
                 if val!= '-1':
@@ -68,8 +69,10 @@ class Level:
                         sprite = Spike((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
                     elif tile_type=='canon':
                         tile_surface=pygame.image.load('./graphics/terrain/canon.png')
-                        # tile_surface=pygame.transform.scale(tile_surface, (tile_surface.get_size()[0]*2, tile_surface.get_size()[1]*2))
                         sprite = Canon((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
+                    elif tile_type=='ckpt':
+                        tile_surface=pygame.image.load('./graphics/terrain/flag/tile000.png')
+                        sprite = Checkpoint((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
                     sprite_group.add(sprite)
 
         return sprite_group 
@@ -79,11 +82,11 @@ class Level:
         for row_index, row in enumerate(layout):
             for col_index, val in enumerate(row):
                 if val!= '-1':
-                    x=col_index*tile_size
-                    y=row_index*tile_size
+                    x=col_index*tile_size+self.offset_x
+                    y=row_index*tile_size+self.offset_y
 
                     if entity =='player':
-                        p = Player((x, y), (x-2*self.offset_x, y-2*self.offset_y))
+                        p = Player((x-self.offset_x, y-self.offset_y), (x-2*self.offset_x, y-2*self.offset_y))
                         sprite_group.add(p)
                         self.player_start_x=x-self.offset_x
                         self.player_start_y=y-self.offset_y
@@ -197,6 +200,8 @@ class Level:
         self.canons = self.create_tile_group(canon_layout, 'canon', 'canon')
         self.tiles.add(self.canons)
 
+        checkpoint_layout = import_csv_layout(level_csv['checkpoint'])
+        self.checkpoints = self.create_tile_group(checkpoint_layout, 'ckpt', 'ckpt')
         
 
 
@@ -728,7 +733,7 @@ class Level:
         player=self.player.sprite
         for c in self.checkpoints.sprites():
             if c.rect.colliderect(player.rect):
-                self.offset_x=-c.coords.x+self.player_start_x
+                self.offset_x=-c.coords.x+self.player_start_x+50
                 self.offset_y=-c.coords.y+self.player_start_y
 
         # print(self.offset_x, self.offset_y)

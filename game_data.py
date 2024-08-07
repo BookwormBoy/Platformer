@@ -14,6 +14,8 @@ level_1={
     'falling_platforms': './levels/1/level_1_falling_platforms.csv',
     'spikes': './levels/1/level_1_spikes.csv',
     'canons': './levels/1/level_1_canons.csv',
-    'player': './levels/1/level_1_player.csv'
+    'player': './levels/1/level_1_player.csv',
+    'checkpoint': './levels/1/level_1_checkpoint.csv'
+
 
 }
