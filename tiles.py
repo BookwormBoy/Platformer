@@ -30,8 +30,8 @@ class Bg_Tile(Tile):
 class H_Moving_Platform(Tile):
     def __init__(self, pos,coords, surface):
         super().__init__(pos,coords, surface)
-        self.w=0.003
-        self.amp=1000
+        self.w=0.002
+        self.amp=1800
     
     def move(self):
         t=pygame.time.get_ticks()

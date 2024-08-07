@@ -45,8 +45,8 @@ class Level:
         for row_index, row in enumerate(layout):
             for col_index, val in enumerate(row):
                 if val!= '-1':
-                    x=col_index*tile_size
-                    y=row_index*tile_size
+                    x=col_index*tile_size+self.offset_x
+                    y=row_index*tile_size+self.offset_y
                     
                     if tile_type=='terrain':
                         tile_surface = terrain_tile_list[int(val)]
@@ -73,6 +73,23 @@ class Level:
                     sprite_group.add(sprite)
 
         return sprite_group 
+    
+    def create_group_single(self, layout, entity):
+        sprite_group = pygame.sprite.GroupSingle()
+        for row_index, row in enumerate(layout):
+            for col_index, val in enumerate(row):
+                if val!= '-1':
+                    x=col_index*tile_size
+                    y=row_index*tile_size
+
+                    if entity =='player':
+                        p = Player((x, y), (x-2*self.offset_x, y-2*self.offset_y))
+                        sprite_group.add(p)
+                        self.player_start_x=x-self.offset_x
+                        self.player_start_y=y-self.offset_y
+        return sprite_group
+
+                        
        
     
     def setup_level(self, layout, level_csv ):
@@ -152,6 +169,9 @@ class Level:
                     ninja=Ninja((x, y-128))
                     self.ninja.add(ninja)
 
+        player_layout = import_csv_layout(level_csv['player'])
+        self.player = self.create_group_single(player_layout, 'player')
+
         terrain_layout = import_csv_layout(level_csv['terrain'])
         self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain', 'terrain')
         for t in self.terrain_sprites.sprites():
@@ -176,6 +196,8 @@ class Level:
         canon_layout = import_csv_layout(level_csv['canons'])
         self.canons = self.create_tile_group(canon_layout, 'canon', 'canon')
         self.tiles.add(self.canons)
+
+        
 
 
     def scroll_x(self):
@@ -454,13 +476,13 @@ class Level:
 
         for p in self.falling_platforms.sprites():
             p.move()
-            self.fp_speed=p.vel.y
+            # self.fp_speed=p.vel.y
             if p.rect.y>level_height:
                 pygame.sprite.Sprite.kill(p)
 
         if player.on_fp:
             player.pos.y+=self.fp_speed+1
-            player.coords.y+=self.fp_speed
+            player.coords.y+=self.fp_speed+1
             player.rect.y=int(player.pos.y)+1
 
         
@@ -486,7 +508,7 @@ class Level:
                     if player.vel.y>=0:
                         player.pos.y = tile.rect.top - player.rect.height+1
                         player.rect.y = int(player.pos.y)
-                        player.coords.y = tile.coords.y - player.rect.height
+                        player.coords.y = tile.coords.y - player.rect.height+1
                         player.vel.y = 0
                         player.on_ground = True
                         player.jumped=False
