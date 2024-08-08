@@ -43,7 +43,7 @@ class H_Moving_Platform(Tile):
 class Canon(Tile):
     def __init__(self, pos, coords,surface):
         super().__init__(pos, coords,surface)
-        self.freq=120
+        self.freq=400
 
 class Bullet(Tile):
     def __init__(self, pos,coords, surface):
@@ -66,37 +66,35 @@ class Bullet(Tile):
         self.rect.y=int(self.pos.y)
 
 class On_Off_Switch(Tile):
-    def __init__(self, pos, coords,size):
-        super().__init__(pos, coords, size)
-        self.image.fill('purple')
+    def __init__(self, pos, coords,surface):
+        super().__init__(pos, coords, surface)
 
     def change_sprite(self, on):
         if on:
-            self.image.fill('purple')
+            self.image=pygame.image.load('./graphics/terrain/switch/on.png')
         else:
-            self.image.fill('blue')
+            self.image=pygame.image.load('./graphics/terrain/switch/off.png')
 
 class On_Block(Tile):
-    def __init__(self, pos, coords, size):
-        super().__init__(pos,coords, size)
-        self.image.fill('purple')
+    def __init__(self, pos, coords, surface):
+        super().__init__(pos,coords, surface)
 
     def change_sprite(self, on):
         if on:
-            self.image.fill('purple')
+            self.image=pygame.image.load('./graphics/terrain/on_blocks/on_active.png')
         else:
-            self.image.fill('pink')
+            self.image=pygame.image.load('./graphics/terrain/on_blocks/on_inactive.png')
+            
 
 class Off_Block(Tile):
-    def __init__(self, pos, coords,size):
-        super().__init__(pos, coords, size)
-        self.image.fill('light blue')
+    def __init__(self, pos, coords,surface):
+        super().__init__(pos, coords, surface)
 
     def change_sprite(self, on):
         if on:
-            self.image.fill('light blue')
+            self.image=pygame.image.load('./graphics/terrain/off_blocks/off_inactive.png')
         else:
-            self.image.fill('blue')
+            self.image=pygame.image.load('./graphics/terrain/off_blocks/off_active.png')
 
 class Shell(pygame.sprite.Sprite):
     def __init__(self, coords,pos):

@@ -19,3 +19,18 @@ level_1={
 
 
 }
+
+level_2={
+    'terrain':'./levels/2/level_2_terrain.csv',
+    'canons': './levels/2/level_2_canons.csv',
+    'player': './levels/2/level_2_player.csv',
+    'h_moving_platforms': './levels/2/level_2_h_moving_platforms.csv',
+    'falling_platforms': './levels/2/level_2_falling_platforms.csv',
+    'spikes': './levels/2/level_2_spikes.csv',
+    'checkpoint': './levels/2/level_2_checkpoint.csv',
+    'bg':'./levels/2/level_2_bg.csv',
+    'switch':'./levels/2/level_2_switch.csv',
+    'on_block':'./levels/2/level_2_on_block.csv',
+    'off_block':'./levels/2/level_2_off_block.csv',
+    
+}

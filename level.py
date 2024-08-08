@@ -14,6 +14,7 @@ class Level:
         self.checkpoint_reached=False
         self.ckpt_x=0
         self.ckpt_y=0
+        self.time=0
 
         self.setup_level(level_data, level_csv)
         self.shift_x = 0
@@ -25,7 +26,6 @@ class Level:
         self.start_ypos=0
         self.hp_speed=0
         self.prev_hp_speed=0
-        self.time=0
         self.on=True
         self.shell_thrown=0
         self.shell_kicked=0
@@ -74,6 +74,15 @@ class Level:
                     elif tile_type=='canon':
                         tile_surface=pygame.image.load('./graphics/terrain/canon.png')
                         sprite = Canon((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
+                    elif tile_type=='switch':
+                        tile_surface=pygame.image.load('./graphics/terrain/switch/on.png')
+                        sprite = On_Off_Switch((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
+                    elif tile_type=='on_block':
+                        tile_surface=pygame.image.load('./graphics/terrain/on_blocks/on_active.png')
+                        sprite = On_Block((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
+                    elif tile_type=='off_block':
+                        tile_surface=pygame.image.load('./graphics/terrain/off_blocks/off_active.png')
+                        sprite = Off_Block((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
                     elif tile_type=='ckpt':
                         tile_surface=pygame.image.load('./graphics/terrain/flag/tile000.png')
                         sprite = Checkpoint((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
@@ -108,6 +117,8 @@ class Level:
        
     
     def setup_level(self, layout, level_csv ):
+        self.time=350
+        self.on=True
         self.right_calibration=level_width+self.offset_x
         self.left_calibration=0+self.offset_x
         self.tiles = pygame.sprite.Group()
@@ -211,6 +222,18 @@ class Level:
         canon_layout = import_csv_layout(level_csv['canons'])
         self.canons = self.create_tile_group(canon_layout, 'canon', 'canon')
         self.tiles.add(self.canons)
+
+        switch_layout = import_csv_layout(level_csv['switch'])
+        self.on_off_switches = self.create_tile_group(switch_layout, 'switch', 'switch')
+        self.tiles.add(self.on_off_switches)
+
+        on_blocks_layout = import_csv_layout(level_csv['on_block'])
+        self.on_blocks = self.create_tile_group(on_blocks_layout, 'on_block', 'on_block')
+        self.tiles.add(self.on_blocks)
+
+        off_blocks_layout = import_csv_layout(level_csv['off_block'])
+        self.off_blocks = self.create_tile_group(off_blocks_layout, 'off_block', 'off_block')
+        self.tiles.add(self.off_blocks)
 
         checkpoint_layout = import_csv_layout(level_csv['checkpoint'])
         self.checkpoints = self.create_tile_group(checkpoint_layout, 'ckpt', 'ckpt')
@@ -405,6 +428,14 @@ class Level:
                                 shell.coords.x = tile.coords.x - shell.rect.width
                                 shell.vel.x = -shell.vel.x
                         
+            for b in self.bullets.sprites():
+                if tile.rect.colliderect(b.rect):
+                    if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True) or tile.__class__==Canon or tile.__class__==Bullet:
+                        pass
+                    else:
+                        # print(tile.__class__)
+                        pygame.sprite.Sprite.kill(b)
+                        pass
 
         #player-shell collisions
 
