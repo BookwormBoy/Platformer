@@ -9,8 +9,12 @@ class Level:
         self.display_surface = surface
         self.offset_x=0
         self.offset_y=0
-        self.player_start_x=0
-        self.player_start_y=0
+        self.player_start_x=64
+        self.player_start_y=500
+        self.checkpoint_reached=False
+        self.ckpt_x=0
+        self.ckpt_y=0
+
         self.setup_level(level_data, level_csv)
         self.shift_x = 0
         self.shift_y = 0
@@ -33,8 +37,8 @@ class Level:
         self.shift_player=False
         self.dont_shift=False
 
-        self.right_calibration=level_width
-        self.left_calibration=0
+        self.right_calibration=level_width+self.offset_x
+        self.left_calibration=0+self.offset_x
 
         
     def create_tile_group(self,layout, sheet, tile_type):
@@ -73,6 +77,8 @@ class Level:
                     elif tile_type=='ckpt':
                         tile_surface=pygame.image.load('./graphics/terrain/flag/tile000.png')
                         sprite = Checkpoint((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
+                        self.ckpt_x=x-self.offset_x
+                        self.ckpt_y=y-self.offset_y
                     sprite_group.add(sprite)
 
         return sprite_group 
@@ -82,14 +88,20 @@ class Level:
         for row_index, row in enumerate(layout):
             for col_index, val in enumerate(row):
                 if val!= '-1':
-                    x=col_index*tile_size+self.offset_x
-                    y=row_index*tile_size+self.offset_y
+                    x=col_index*tile_size
+                    y=row_index*tile_size
+                    print(x,y)
 
                     if entity =='player':
-                        p = Player((x-self.offset_x, y-self.offset_y), (x-2*self.offset_x, y-2*self.offset_y))
+                        if not self.checkpoint_reached:
+                            p = Player((self.player_start_x, self.player_start_y), (x, y))
+                            self.offset_x = self.player_start_x - x
+                            self.offset_y = self.player_start_y - y
+                        else:
+                            p = Player((self.player_start_x, self.player_start_y), (self.ckpt_x , self.ckpt_y))
+
                         sprite_group.add(p)
-                        self.player_start_x=x-self.offset_x
-                        self.player_start_y=y-self.offset_y
+                        
         return sprite_group
 
                         
@@ -203,7 +215,6 @@ class Level:
         checkpoint_layout = import_csv_layout(level_csv['checkpoint'])
         self.checkpoints = self.create_tile_group(checkpoint_layout, 'ckpt', 'ckpt')
         
-
 
     def scroll_x(self):
         self.shift_x = 0
@@ -733,8 +744,11 @@ class Level:
         player=self.player.sprite
         for c in self.checkpoints.sprites():
             if c.rect.colliderect(player.rect):
-                self.offset_x=-c.coords.x+self.player_start_x+50
-                self.offset_y=-c.coords.y+self.player_start_y
+                self.player_start_x = 640
+                self.player_start_y= 500
+                self.offset_x= self.player_start_x-c.coords.x
+                self.offset_y = self.player_start_y - c.coords.y
+                self.checkpoint_reached=True
 
         # print(self.offset_x, self.offset_y)
 
