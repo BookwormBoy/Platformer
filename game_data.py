@@ -15,8 +15,10 @@ level_1={
     'spikes': './levels/1/level_1_spikes.csv',
     'canons': './levels/1/level_1_canons.csv',
     'player': './levels/1/level_1_player.csv',
-    'checkpoint': './levels/1/level_1_checkpoint.csv'
-
+    'checkpoint': './levels/1/level_1_checkpoint.csv',
+    'switch':'./levels/2/level_2_switch.csv',
+    'on_block':'./levels/2/level_2_on_block.csv',
+    'off_block':'./levels/2/level_2_off_block.csv',
 
 }
 
@@ -33,4 +35,21 @@ level_2={
     'on_block':'./levels/2/level_2_on_block.csv',
     'off_block':'./levels/2/level_2_off_block.csv',
     
+}
+
+level_3={
+    'terrain':'./levels/3/level_3_terrain.csv',
+    'canons': './levels/3/level_3_canons.csv',
+    'player': './levels/3/level_3_player.csv',
+    'h_moving_platforms': './levels/3/level_3_h_moving_platforms.csv',
+    'falling_platforms': './levels/3/level_3_falling_platforms.csv',
+    'spikes': './levels/3/level_3_spikes.csv',
+    'checkpoint': './levels/3/level_3_checkpoint.csv',
+    'bg':'./levels/3/level_3_bg.csv',
+    'switch':'./levels/3/level_3_switch.csv',
+    'on_block':'./levels/3/level_3_on_block.csv',
+    'off_block':'./levels/3/level_3_off_block.csv',
+    'shell':'./levels/3/level_3_shells.csv',
+    'firejet':'./levels/3/level_3_firejet.csv',
+
 }

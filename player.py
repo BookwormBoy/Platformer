@@ -244,7 +244,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.slow_jump=False
 
-       
+        # print(self.on_ground, self.status, self.touching_wall_r, self.touching_wall_l, self.vel.x)
 
     def get_status(self):
 

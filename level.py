@@ -83,6 +83,12 @@ class Level:
                     elif tile_type=='off_block':
                         tile_surface=pygame.image.load('./graphics/terrain/off_blocks/off_active.png')
                         sprite = Off_Block((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
+                    elif tile_type=='shell':
+                        tile_surface=pygame.image.load('./graphics/terrain/shell.png')
+                        sprite = Shell((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
+                    elif tile_type=='firejet':
+                        tile_surface=pygame.image.load('./graphics/terrain/flame.png')
+                        sprite = Flame((x,y-32), (x-self.offset_x,y-self.offset_y))
                     elif tile_type=='ckpt':
                         tile_surface=pygame.image.load('./graphics/terrain/flag/tile000.png')
                         sprite = Checkpoint((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
@@ -99,7 +105,6 @@ class Level:
                 if val!= '-1':
                     x=col_index*tile_size
                     y=row_index*tile_size
-                    print(x,y)
 
                     if entity =='player':
                         if not self.checkpoint_reached:
@@ -117,7 +122,7 @@ class Level:
        
     
     def setup_level(self, layout, level_csv ):
-        self.time=350
+        self.time=250
         self.on=True
         self.right_calibration=level_width+self.offset_x
         self.left_calibration=0+self.offset_x
@@ -235,6 +240,14 @@ class Level:
         self.off_blocks = self.create_tile_group(off_blocks_layout, 'off_block', 'off_block')
         self.tiles.add(self.off_blocks)
 
+        shell_layout = import_csv_layout(level_csv['shell'])
+        self.shells = self.create_tile_group(shell_layout, 'shell', 'shell')
+
+        flame_layout = import_csv_layout(level_csv['firejet'])
+        self.on_flames = self.create_tile_group(flame_layout, 'firejet', 'firejet')
+        # self.flames=pygame.sprite.Group()
+        self.flames.add(self.on_flames)
+
         checkpoint_layout = import_csv_layout(level_csv['checkpoint'])
         self.checkpoints = self.create_tile_group(checkpoint_layout, 'ckpt', 'ckpt')
         
@@ -346,7 +359,7 @@ class Level:
         player.rect.x = int(player.pos.x)
 
         for p in self.h_moving_platforms: #horizontal moving platforms
-            p.move()
+            p.move(self.time)
 
         for b in self.bullets.sprites(): #bullets
             b.move_x()
@@ -445,7 +458,7 @@ class Level:
             if shell.rect.colliderect(player.rect) and not player.dead:
                 if shell.kicked:
                     t=pygame.time.get_ticks()
-                    if(t-self.shell_thrown>100) and (t-self.shell_kicked>100) and (t-self.thrown_up>100) and (t-self.shell_regrab)>100:
+                    if(t-self.shell_thrown>150) and (t-self.shell_kicked>150) and (t-self.thrown_up>150) and (t-self.shell_regrab)>150:
                         player.dead=True
                 else:
                     if keys[pygame.K_LSHIFT] and not player.holding_shell:
@@ -455,14 +468,14 @@ class Level:
                         t=pygame.time.get_ticks()
                         if t-self.thrown_up>100:
                             if player.vel.x>0:
-                                shell.vel.x=12
+                                shell.vel.x=10
                                 shell.kicked=True
                                 self.shell_kicked=pygame.time.get_ticks()
                                 player.pos.x = shell.rect.left - player.rect.width
                                 player.rect.x = int(player.pos.x)
                                 player.coords.x = shell.coords.x - player.rect.width
                             elif player.vel.x<0:
-                                shell.vel.x=-12
+                                shell.vel.x=-10
                                 shell.kicked=True
                                 self.shell_kicked=pygame.time.get_ticks()
                                 player.pos.x = shell.rect.right
@@ -513,7 +526,7 @@ class Level:
             b.move_y()
 
         for shell in self.shells.sprites():
-            shell.move_y(self.shift_y, player.pos.y-31, player.coords.y-31)
+            shell.move_y(self.shift_y, player.pos.y-35, player.coords.y-35)
 
         for flame in self.flames.sprites():
             flame.move_y(self.shift_y)
@@ -640,6 +653,8 @@ class Level:
                                 shell.rect.y = int(shell.pos.y)
                                 shell.coords.y = tile.coords.y + tile_size
                                 shell.vel.y=0
+                                if tile.__class__==On_Off_Switch:
+                                    self.on=not self.on
                             elif shell.vel.y>0:
                                 shell.pos.y = tile.rect.top - shell.rect.height
                                 shell.rect.y = int(shell.pos.y)
@@ -657,7 +672,7 @@ class Level:
                     if shell.kicked and t-self.shell_kicked>100:
                         shell.kicked=False
                         if keys[pygame.K_d]:
-                            player.vel.y=-15
+                            player.vel.y=-19
                         else:
                             player.vel.y=-10
                         shell.vel.x=0
@@ -671,9 +686,9 @@ class Level:
                         # print(t, self.shell_stopped)
                         if t-self.shell_stopped>100:
                             if player.rect.centerx<=shell.rect.centerx:
-                                shell.vel.x=12
+                                shell.vel.x=10
                             else:
-                                shell.vel.x=-12
+                                shell.vel.x=-10
                             shell.kicked=True
                             self.shell_kicked=pygame.time.get_ticks()
                 else:
@@ -714,7 +729,6 @@ class Level:
 
         # print(player.rect.y, player.pos.y)
             
-        # print(self.on)
         
 
 

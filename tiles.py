@@ -33,9 +33,9 @@ class H_Moving_Platform(Tile):
         self.w=0.002
         self.amp=1800
     
-    def move(self):
+    def move(self, time):
         t=pygame.time.get_ticks()
-        self.vel.x = -self.amp*self.w*math.sin(self.w*t)
+        self.vel.x = -self.amp*self.w*math.sin(self.w*time*10)
         self.pos.x+=self.vel.x
         self.coords.x+=self.vel.x
         # print(self.rect.x)
@@ -43,7 +43,7 @@ class H_Moving_Platform(Tile):
 class Canon(Tile):
     def __init__(self, pos, coords,surface):
         super().__init__(pos, coords,surface)
-        self.freq=400
+        self.freq=300
 
 class Bullet(Tile):
     def __init__(self, pos,coords, surface):
@@ -97,10 +97,9 @@ class Off_Block(Tile):
             self.image=pygame.image.load('./graphics/terrain/off_blocks/off_active.png')
 
 class Shell(pygame.sprite.Sprite):
-    def __init__(self, coords,pos):
+    def __init__(self, pos, coords,  surface):
         super().__init__()
-        self.image = pygame.Surface((30, 30))
-        self.image.fill('grey')
+        self.image = surface
         self.rect=self.image.get_rect(topleft = pos)
 
         self.pos = pygame.math.Vector2(self.rect.x, self.rect.y)
@@ -143,7 +142,7 @@ class Falling_Platform(Tile):
 
     def move(self):
         if self.triggered:
-            self.acc.y=0.1
+            self.acc.y=0.3
             self.vel.y+=self.acc.y
             self.pos.y+=self.vel.y
             self.rect.y=int(self.pos.y)
@@ -158,14 +157,13 @@ class Firejet(Tile):
         self.image.fill('blue')
 
 class Flame(pygame.sprite.Sprite):
-    def __init__(self, pos, coords,size):
+    def __init__(self, pos, coords):
         super().__init__()
-        self.image = pygame.Surface((size, size))
+        self.image = pygame.image.load('./graphics/terrain/flame.png')
         self.rect=self.image.get_rect(topleft = pos)
 
         self.pos = pygame.math.Vector2(self.rect.x, self.rect.y)
         self.coords = pygame.math.Vector2(coords[0], coords[1])
-        self.image.fill('red')
         self.on=True
         self.freq=200
 
