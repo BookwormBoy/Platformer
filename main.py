@@ -3,6 +3,10 @@ from settings import *
 from level import Level
 from game_data import *
 from overworld import Overworld
+from pygame import mixer
+mixer.init()
+mixer.music.load('./audio/level.ogg')
+mixer.music.play(-1)
 
 
 class Game():
@@ -12,10 +16,12 @@ class Game():
     def create_level(self,current_level):
         self.level = Level(level_map,current_level,level_csv[current_level], screen,self.create_overworld)
         self.status = 'level'
+        # channel_1.play(sound2, -1)
 
     def create_overworld(self,current_level,new_max_level):
         self.overworld = Overworld(current_level,new_max_level,screen,self.create_level)
         self.status = 'overworld'
+        # channel_1.play(sound1, -1)
     def run(self):
         if self.status=='overworld':
             self.overworld.run()

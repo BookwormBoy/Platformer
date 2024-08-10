@@ -3,10 +3,7 @@ from tiles import *
 from player import Player
 from settings import *
 from enemies import *
-from pygame import mixer
-mixer.init()
-mixer.music.load('./audio/level.ogg')
-mixer.music.play(-1)
+
 
 class Level:
     def __init__(self, level_data, current_level, level_csv, surface, create_overworld):
@@ -58,6 +55,10 @@ class Level:
         self.ninja_healthbar = pygame.transform.scale(self.ninja_healthbar, (306, 24))
         self.ninja_health=pygame.Surface((300, 18))
         self.ninja_health.fill('blue')
+
+        font = pygame.font.Font('Pixeltype.ttf', 92)
+        text='You Won!'
+        self.wintext = font.render(text, True, 'black')
 
         
     def create_tile_group(self,layout, sheet, tile_type):
@@ -979,6 +980,9 @@ class Level:
 
         if self.level_clear:
             self.create_overworld(self.current_level, self.current_level+1)
-            mixer.quit()
+            # mixer.quit()
+
+        if self.win:
+            pygame.Surface.blit(self.display_surface, self.wintext, (500,430))
 
                

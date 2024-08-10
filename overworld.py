@@ -5,10 +5,6 @@ from settings import *
 from game_data import *
 from tiles import Bg_Tile
 from support import import_csv_layout
-from pygame import mixer
-mixer.init()
-mixer.music.load('./audio/level.ogg')
-mixer.music.play(-1)
 
 class Overworld():
     def __init__(self, current_level, max_level, surface, create_level):
@@ -120,9 +116,9 @@ class Overworld():
                 player.status='walk'
                 player.facing_right=False
             elif keys[pygame.K_UP]:
-                print('h')
+                # print('h')
                 self.create_level(self.level_selected)
-                mixer.quit()
+                # mixer.quit()
 
 
         else:
