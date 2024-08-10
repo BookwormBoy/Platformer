@@ -3,6 +3,10 @@ from tiles import *
 from player import Player
 from settings import *
 from enemies import *
+from pygame import mixer
+# mixer.init()
+# mixer.music.load('./audio/level.ogg')
+# mixer.music.play(-1)
 
 class Level:
     def __init__(self, level_data, current_level, level_csv, surface, create_overworld):
@@ -966,7 +970,7 @@ class Level:
         if not self.paused:
             self.time+=1
 
-        if ninja.health==0:
+        if self.current_level==4 and ninja.health==0:
             self.win=True
 
         if (player.dead and player.frame_index>=6 )or player.coords.y+player.rect.height>level_height:
