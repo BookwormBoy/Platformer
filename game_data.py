@@ -61,8 +61,15 @@ level_3={
 
 }
 
+level_4={
+    'terrain':'./levels/4/level_4_terrain.csv',
+    'player':'./levels/4/level_4_player.csv',
+
+}
+
 level_csv={
     1:level_1,
     2:level_2,
     3:level_3,
+    4:level_4
 }

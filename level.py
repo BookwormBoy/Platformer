@@ -49,6 +49,9 @@ class Level:
         if sheet == 'terrain':
             terrain_tile_list = import_cut_graphics('./graphics/terrain/terrain_tiles.png', 16)
 
+        elif sheet == 'caves':
+            terrain_tile_list = import_cut_graphics('./graphics/terrain/caves.png', 16)
+
 
         for row_index, row in enumerate(layout):
             for col_index, val in enumerate(row):
@@ -116,7 +119,8 @@ class Level:
                         if not self.checkpoint_reached:
                             p = Player((self.player_start_x, self.player_start_y), (x, y))
                             self.offset_x = self.player_start_x - x
-                            self.offset_y = self.player_start_y - y
+                            if not self.current_level==4:
+                                self.offset_y = self.player_start_y - y
                         else:
                             p = Player((self.player_start_x, self.player_start_y), (self.ckpt_x , self.ckpt_y))
 
@@ -209,63 +213,78 @@ class Level:
         player_layout = import_csv_layout(level_csv['player'])
         self.player = self.create_group_single(player_layout, 'player')
 
-        terrain_layout = import_csv_layout(level_csv['terrain'])
-        self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain', 'terrain')
-        for t in self.terrain_sprites.sprites():
-            self.tiles.add(t)
+        if self.current_level!=4:
 
-        bg_layout = import_csv_layout(level_csv['bg'])
-        self.bg_sprites = self.create_tile_group(bg_layout, 'terrain', 'bg')
-        self.tiles.add(self.bg_sprites)
+            terrain_layout = import_csv_layout(level_csv['terrain'])
+            self.terrain_sprites = self.create_tile_group(terrain_layout, 'terrain', 'terrain')
+            for t in self.terrain_sprites.sprites():
+                self.tiles.add(t)
 
-        hmp_layout = import_csv_layout(level_csv['h_moving_platforms'])
-        self.h_moving_platforms=self.create_tile_group(hmp_layout, 'hmp', 'hmp')
-        self.tiles.add(self.h_moving_platforms)
+            bg_layout = import_csv_layout(level_csv['bg'])
+            self.bg_sprites = self.create_tile_group(bg_layout, 'terrain', 'bg')
+            self.tiles.add(self.bg_sprites)
 
-        falling_platform_layout = import_csv_layout(level_csv['falling_platforms'])
-        self.falling_platforms = self.create_tile_group(falling_platform_layout, 'fp', 'fp')
-        self.tiles.add(self.falling_platforms)
+            hmp_layout = import_csv_layout(level_csv['h_moving_platforms'])
+            self.h_moving_platforms=self.create_tile_group(hmp_layout, 'hmp', 'hmp')
+            self.tiles.add(self.h_moving_platforms)
 
-        falling_platform_layout = import_csv_layout(level_csv['spikes'])
-        self.spikes = self.create_tile_group(falling_platform_layout, 'spikes', 'spikes')
-        self.tiles.add(self.spikes)
+            falling_platform_layout = import_csv_layout(level_csv['falling_platforms'])
+            self.falling_platforms = self.create_tile_group(falling_platform_layout, 'fp', 'fp')
+            self.tiles.add(self.falling_platforms)
 
-        canon_layout = import_csv_layout(level_csv['canons'])
-        self.canons = self.create_tile_group(canon_layout, 'canon', 'canon')
-        self.tiles.add(self.canons)
+            falling_platform_layout = import_csv_layout(level_csv['spikes'])
+            self.spikes = self.create_tile_group(falling_platform_layout, 'spikes', 'spikes')
+            self.tiles.add(self.spikes)
 
-        switch_layout = import_csv_layout(level_csv['switch'])
-        self.on_off_switches = self.create_tile_group(switch_layout, 'switch', 'switch')
-        self.tiles.add(self.on_off_switches)
+            canon_layout = import_csv_layout(level_csv['canons'])
+            self.canons = self.create_tile_group(canon_layout, 'canon', 'canon')
+            self.tiles.add(self.canons)
 
-        on_blocks_layout = import_csv_layout(level_csv['on_block'])
-        self.on_blocks = self.create_tile_group(on_blocks_layout, 'on_block', 'on_block')
-        self.tiles.add(self.on_blocks)
+            switch_layout = import_csv_layout(level_csv['switch'])
+            self.on_off_switches = self.create_tile_group(switch_layout, 'switch', 'switch')
+            self.tiles.add(self.on_off_switches)
 
-        off_blocks_layout = import_csv_layout(level_csv['off_block'])
-        self.off_blocks = self.create_tile_group(off_blocks_layout, 'off_block', 'off_block')
-        self.tiles.add(self.off_blocks)
+            on_blocks_layout = import_csv_layout(level_csv['on_block'])
+            self.on_blocks = self.create_tile_group(on_blocks_layout, 'on_block', 'on_block')
+            self.tiles.add(self.on_blocks)
 
-        shell_layout = import_csv_layout(level_csv['shell'])
-        self.shells = self.create_tile_group(shell_layout, 'shell', 'shell')
+            off_blocks_layout = import_csv_layout(level_csv['off_block'])
+            self.off_blocks = self.create_tile_group(off_blocks_layout, 'off_block', 'off_block')
+            self.tiles.add(self.off_blocks)
 
-        flame_layout = import_csv_layout(level_csv['firejet'])
-        self.on_flames = self.create_tile_group(flame_layout, 'firejet', 'firejet')
-        # self.flames=pygame.sprite.Group()
-        self.flames.add(self.on_flames)
+            shell_layout = import_csv_layout(level_csv['shell'])
+            self.shells = self.create_tile_group(shell_layout, 'shell', 'shell')
 
-        goal_layout = import_csv_layout(level_csv['goal'])
-        self.goal = self.create_tile_group(goal_layout, 'goal', 'goal')
-        self.tiles.add(self.goal)
+            flame_layout = import_csv_layout(level_csv['firejet'])
+            self.on_flames = self.create_tile_group(flame_layout, 'firejet', 'firejet')
+            # self.flames=pygame.sprite.Group()
+            self.flames.add(self.on_flames)
+
+            goal_layout = import_csv_layout(level_csv['goal'])
+            self.goal = self.create_tile_group(goal_layout, 'goal', 'goal')
+            self.tiles.add(self.goal)
 
 
-        checkpoint_layout = import_csv_layout(level_csv['checkpoint'])
-        self.checkpoints = self.create_tile_group(checkpoint_layout, 'ckpt', 'ckpt')
+            checkpoint_layout = import_csv_layout(level_csv['checkpoint'])
+            self.checkpoints = self.create_tile_group(checkpoint_layout, 'ckpt', 'ckpt')
 
-        self.background=pygame.sprite.Group()
-        surface=pygame.image.load('./graphics/terrain/backdrop.png')
-        sprite=Bg_Tile((0, 0), (0, 0), surface)
-        self.background.add(sprite)
+            self.background=pygame.sprite.Group()
+            surface=pygame.image.load('./graphics/terrain/backdrop.png')
+            sprite=Bg_Tile((0, 0), (0, 0), surface)
+            self.background.add(sprite)
+
+        else:
+            terrain_layout = import_csv_layout(level_csv['terrain'])
+            self.terrain_sprites = self.create_tile_group(terrain_layout, 'caves', 'terrain')
+            for t in self.terrain_sprites.sprites():
+                self.tiles.add(t)
+
+            self.background=pygame.sprite.Group()
+            surface=pygame.image.load('./graphics/terrain/boss_bg.png')
+            sprite=Bg_Tile((0, 0), (0, 0), surface)
+            self.background.add(sprite)
+
+            self.goal=pygame.sprite.Group()
 
         
 
@@ -863,7 +882,9 @@ class Level:
 
         self.background.draw(self.display_surface)
         self.tiles.draw(self.display_surface)
-        self.bg_sprites.draw(self.display_surface)
+
+        if not self.current_level==4:
+            self.bg_sprites.draw(self.display_surface)
 
         if not self.paused:
             self.shoot_canon()
@@ -875,20 +896,22 @@ class Level:
             if len(self.ninja)==1:
                 ninja.run(player)
 
-        self.bullets.draw(self.display_surface)
-        self.shells.draw(self.display_surface)
-        self.on_flames.draw(self.display_surface)
-        self.checkpoints.draw(self.display_surface)
-        self.falling_spikes.draw(self.display_surface)
+        if not self.current_level==4:
+            self.bullets.draw(self.display_surface)
+            self.shells.draw(self.display_surface)
+            self.on_flames.draw(self.display_surface)
+            self.checkpoints.draw(self.display_surface)
+            self.falling_spikes.draw(self.display_surface)
         if len(self.ninja)==1:
             self.ninja.draw(self.display_surface)
 
         if not self.paused:
             self.player.update(ninja)
-            self.scroll_x()
+            if not self.current_level==4:
+                self.scroll_x()
             self.x_collisions() 
-            
-            self.scroll_y()
+            if not self.current_level==4:
+                self.scroll_y()
             self.y_collisions()
         # print(player.coords.y)
 
