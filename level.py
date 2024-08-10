@@ -39,9 +39,20 @@ class Level:
         self.shift_player=False
         self.dont_shift=False
         self.level_clear=False
+        self.win=False
 
         self.right_calibration=level_width[self.current_level]+self.offset_x
         self.left_calibration=0+self.offset_x
+
+        self.player_healthbar=pygame.image.load('./graphics/healthbars/healthbar.png')
+        self.player_healthbar = pygame.transform.scale(self.player_healthbar, (306, 24))
+        self.player_health=pygame.Surface((300, 18))
+        self.player_health.fill('red')
+
+        self.ninja_healthbar=pygame.image.load('./graphics/healthbars/healthbar.png')
+        self.ninja_healthbar = pygame.transform.scale(self.ninja_healthbar, (306, 24))
+        self.ninja_health=pygame.Surface((300, 18))
+        self.ninja_health.fill('blue')
 
         
     def create_tile_group(self,layout, sheet, tile_type):
@@ -125,6 +136,10 @@ class Level:
                             p = Player((self.player_start_x, self.player_start_y), (self.ckpt_x , self.ckpt_y))
 
                         sprite_group.add(p)
+
+                    elif entity == 'ninja':
+                        nin = Ninja((x, y))
+                        sprite_group.add(nin)
                         
         return sprite_group
 
@@ -285,6 +300,10 @@ class Level:
             self.background.add(sprite)
 
             self.goal=pygame.sprite.Group()
+
+            ninja_layout=import_csv_layout(level_csv['ninja'])
+            self.ninja = self.create_group_single(ninja_layout, 'ninja')
+
 
         
 
@@ -843,6 +862,7 @@ class Level:
             fs.update()
             if fs.rect.colliderect(player.rect):
                 player.health-=10
+                pygame.sprite.Sprite.kill(fs)
 
             for tile in self.tiles.sprites():
                 if fs.rect.colliderect(tile.rect):
@@ -892,7 +912,8 @@ class Level:
             self.handle_flames()
             self.handle_checkpoints()
             self.handle_goal()
-            # self.handle_falling_spikes()
+            if self.current_level==4 and not self.win:
+                self.handle_falling_spikes()
             if len(self.ninja)==1:
                 ninja.run(player)
 
@@ -901,6 +922,7 @@ class Level:
             self.shells.draw(self.display_surface)
             self.on_flames.draw(self.display_surface)
             self.checkpoints.draw(self.display_surface)
+        else:
             self.falling_spikes.draw(self.display_surface)
         if len(self.ninja)==1:
             self.ninja.draw(self.display_surface)
@@ -915,6 +937,18 @@ class Level:
             self.y_collisions()
         # print(player.coords.y)
 
+        if self.current_level==4:
+            # print('ho')
+            self.display_surface.blit(self.player_healthbar, (30, 50))
+            self.player_health=pygame.Surface((player.health*3, 15))
+            self.player_health.fill('#b51d57')
+            self.display_surface.blit(self.player_health, (33, 53))
+
+            self.display_surface.blit(self.ninja_healthbar, (1280-330, 50))
+            self.ninja_health=pygame.Surface((ninja.health*3, 15))
+            self.ninja_health.fill('#295eb3')
+            self.display_surface.blit(self.ninja_health, (1280-327+(300-ninja.health*3), 53))
+
         # if player.attacking:
         #     player.rect.y-=12
         if player.sliding:
@@ -927,6 +961,9 @@ class Level:
 
         if not self.paused:
             self.time+=1
+
+        if ninja.health==0:
+            self.win=True
 
         if (player.dead and player.frame_index>=6 )or player.coords.y+player.rect.height>level_height:
             self.reset()        

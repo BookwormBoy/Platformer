@@ -17,6 +17,7 @@ class Ninja(pygame.sprite.Sprite):
         self.attacking=False
         self.has_attacked=False
         self.health=100
+        self.dead=False
 
     def import_character_assets(self):
         character_path='./graphics/ninja/'
@@ -59,11 +60,12 @@ class Ninja(pygame.sprite.Sprite):
             return
 
         if self.health<=0:
+            self.dead=True
             self.status='dead'
             self.frame_index=0
             self.animation_speed=0.15
             return
-        if self.status=='idle' and t-self.idle_timer>500:
+        if self.status=='idle' and t-self.idle_timer>1000:
             self.frame_index=0
             self.status='walk'
 
@@ -105,17 +107,20 @@ class Ninja(pygame.sprite.Sprite):
         # print(self.rect.x,self.rect.x+self.rect.width, player.rect.x, player.rect.x+player.rect.width)
 
     def handle_player_collisions(self, player):
-        if self.attacking and self.frame_index>=7 and self.frame_index<11:
+        if self.attacking and self.frame_index>=7 and self.frame_index<11 and not self.dead:
             if self.facing_right:
                 if ((player.rect.x+player.rect.width)>=(self.rect.x+104)) and (player.rect.x<=self.rect.x+236) and player.rect.top<=self.rect.bottom-62 and player.rect.bottom>=self.rect.top+122 and not self.has_attacked:
-                    player.health-=1
+                    player.health-=10
                     self.has_attacked=True
                     # print('a')
             else:
                 if ((player.rect.x+player.rect.width)>=(self.rect.x+20)) and (player.rect.x<=self.rect.x+152) and player.rect.top<=self.rect.bottom-62 and player.rect.bottom>=self.rect.top+122 and not self.has_attacked:
-                    player.health-=1
+                    player.health-=10
                     self.has_attacked=True
                     # print('b')
+
+            if player.health<0:
+                player.health=0
 
         
                

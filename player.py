@@ -346,11 +346,14 @@ class Player(pygame.sprite.Sprite):
         elif self.frame_index>=10 and self.frame_index<11 and not self.third_hit:                
             enemy.health-=10
             self.third_hit=True
+        
+        if enemy.health<0:
+            enemy.health=0
     def handle_enemy_collisions(self, enemy):
         if enemy==None:
             return
         # print(self.rect.x, enemy.rect.x)
-        if self.attacking:
+        if self.attacking and not self.dead:
             if enemy.facing_right:
                 if self.rect.x+62>=enemy.rect.x+96 and self.rect.x<=enemy.rect.x+148 and self.rect.top<=enemy.rect.bottom-62 and self.rect.bottom>=enemy.rect.top+122:
                     self.find_damage(enemy)
