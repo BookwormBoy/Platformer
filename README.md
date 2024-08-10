@@ -15,11 +15,17 @@ I used pygame to develop this platformer. I do not like 3D games games so I did 
 I used Tiled to design the levels. Tiled generates a csv file which I can then use to place elements on the screen. 
 
 Most of the art and music is from itch.io.
+
+I used OOP to make my life simpler, a lot of obstacles with redundant functions were grouped into one class that they inherited from and then they possessed unique features of their own. 
 ## Challenges Faced
 
 One of the challenges was figuring out that pygame uses ints to position rects. I kept getting inaccurate and glitchy movement for my sprites until I realized this. When positions got negative, it rounded them up and gave wrong positions. To fix this, I stored positions in a 2D vector and and then manually converted to int for figuring out the rect position.
 
-The next challenge was elements was the camera. The camera for my previous game was quite basic. It kept the player in a box and moved the background if the player went outside the box. But I realized this meant much of what was coming up wasn't visible to the player. I went back and played New Super Mario Bros. and figured how they modelled the camera. Depending on which way the player is facing, the camera moves so that most of the level is in front of the player. I made my camera in a similar way
+The next challenge was elements was the camera. The camera for my previous game was quite basic. It kept the player in a box and moved the background if the player went outside the box. But I realized this meant much of what was coming up wasn't visible to the player. I went back and played New Super Mario Bros. and figured how they modelled the camera. Depending on which way the player is facing, the camera moves so that most of the level is in front of the player. I made my camera in a similar way.
+
+Managing the art was quite a headache too. Some tilesets were 16bit others were 32 bit and some others in rather random resolutions. Cropping, resizing, splitting images to make them look good together took quite a long time.
+
+
 ## How to Play
 
 Clone the github repository. Navigate to the repo and open it in the terminal. Type in: python3 main.py to run the game. You must have pygame installed.
