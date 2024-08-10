@@ -52,10 +52,10 @@ In the overworld press UP_ARROW to start a level.
 
 Add even more obstacles and levels
 
-Demo Link: https://youtu.be/EoG76wMe1T0
-
 Initially I wanted to add a swinging/grappling hook mechanism but it proved too difficult in the time I had. I would love to implement this in the future.
 
 More bosses. Perhaps one for each level.
 
 Better combat system with more powerful attacks if you get certain combos/streaks.
+
+Demo Link: https://youtu.be/EoG76wMe1T0
