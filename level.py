@@ -5,7 +5,7 @@ from settings import *
 from enemies import *
 
 class Level:
-    def __init__(self, level_data, level_csv, surface):
+    def __init__(self, level_data, current_level, level_csv, surface, create_overworld):
         self.display_surface = surface
         self.offset_x=0
         self.offset_y=0
@@ -15,6 +15,8 @@ class Level:
         self.ckpt_x=0
         self.ckpt_y=0
         self.time=0
+        self.current_level=current_level
+        self.create_overworld=create_overworld
 
         self.setup_level(level_data, level_csv)
         self.shift_x = 0
@@ -36,8 +38,9 @@ class Level:
         self.pause_start=0
         self.shift_player=False
         self.dont_shift=False
+        self.level_clear=False
 
-        self.right_calibration=level_width+self.offset_x
+        self.right_calibration=level_width[self.current_level]+self.offset_x
         self.left_calibration=0+self.offset_x
 
         
@@ -124,7 +127,7 @@ class Level:
     def setup_level(self, layout, level_csv ):
         self.time=250
         self.on=True
-        self.right_calibration=level_width+self.offset_x
+        self.right_calibration=level_width[self.current_level]+self.offset_x
         self.left_calibration=0+self.offset_x
         self.tiles = pygame.sprite.Group()
         self.blocks = pygame.sprite.Group()
@@ -268,7 +271,7 @@ class Level:
                 self.shift_x=-player.prev_x_vel
                 player.pos.x-=player.prev_x_vel
         else:
-            if self.left_calibration>0 or player.coords.x>level_width-screen_width/3:
+            if self.left_calibration>0 or player.coords.x>level_width[self.current_level]-screen_width/3:
                 self.shift_x=0
             elif player.pos.x<2*screen_width/3:
                 self.shift_x=-3*(player.prev_x_vel)/2
@@ -363,7 +366,7 @@ class Level:
 
         for b in self.bullets.sprites(): #bullets
             b.move_x()
-            if b.coords.x < 0 or b.coords.x>level_width or b.coords.y<0 or b.coords.y>level_height:
+            if b.coords.x < 0 or b.coords.x>level_width[self.current_level] or b.coords.y<0 or b.coords.y>level_height:
                 pygame.sprite.Sprite.kill(b)
 
         for shell in self.shells.sprites():
@@ -883,6 +886,7 @@ class Level:
         if (player.dead and player.frame_index>=6 )or player.coords.y+player.rect.height>level_height:
             self.reset()        
 
-        # print(player.coords)
+        if self.level_clear:
+            self.create_overworld(self.current_level, self.current_level+1)
 
                

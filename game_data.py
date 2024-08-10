@@ -16,9 +16,11 @@ level_1={
     'canons': './levels/1/level_1_canons.csv',
     'player': './levels/1/level_1_player.csv',
     'checkpoint': './levels/1/level_1_checkpoint.csv',
-    'switch':'./levels/2/level_2_switch.csv',
-    'on_block':'./levels/2/level_2_on_block.csv',
-    'off_block':'./levels/2/level_2_off_block.csv',
+    'switch':'./levels/1/level_1_switch.csv',
+    'on_block':'./levels/1/level_1_on_block.csv',
+    'off_block':'./levels/1/level_1_off_block.csv',
+    'shell':'./levels/1/level_1_shells.csv',
+    'firejet':'./levels/1/level_1_firejet.csv',
 
 }
 
@@ -34,6 +36,8 @@ level_2={
     'switch':'./levels/2/level_2_switch.csv',
     'on_block':'./levels/2/level_2_on_block.csv',
     'off_block':'./levels/2/level_2_off_block.csv',
+    'shell':'./levels/2/level_2_shells.csv',
+    'firejet':'./levels/2/level_2_firejet.csv'
     
 }
 
@@ -52,4 +56,10 @@ level_3={
     'shell':'./levels/3/level_3_shells.csv',
     'firejet':'./levels/3/level_3_firejet.csv',
 
+}
+
+level_csv={
+    1:level_1,
+    2:level_2,
+    3:level_3,
 }
