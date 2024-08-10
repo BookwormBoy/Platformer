@@ -923,7 +923,8 @@ class Level:
             self.on_flames.draw(self.display_surface)
             self.checkpoints.draw(self.display_surface)
         else:
-            self.falling_spikes.draw(self.display_surface)
+            if not self.win:
+                self.falling_spikes.draw(self.display_surface)
         if len(self.ninja)==1:
             self.ninja.draw(self.display_surface)
 
@@ -948,6 +949,9 @@ class Level:
             self.ninja_health=pygame.Surface((ninja.health*3, 15))
             self.ninja_health.fill('#295eb3')
             self.display_surface.blit(self.ninja_health, (1280-327+(300-ninja.health*3), 53))
+
+            player.effects.draw(self.display_surface)
+            ninja.effects.draw(self.display_surface)
 
         # if player.attacking:
         #     player.rect.y-=12

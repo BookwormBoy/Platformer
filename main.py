@@ -7,7 +7,7 @@ from overworld import Overworld
 
 class Game():
     def __init__(self):
-        self.overworld=Overworld(4, 1, screen, self.create_level)
+        self.overworld=Overworld(1, 1, screen, self.create_level)
         self.status='overworld'
     def create_level(self,current_level):
         self.level = Level(level_map,current_level,level_csv[current_level], screen,self.create_overworld)

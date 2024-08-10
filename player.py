@@ -1,5 +1,6 @@
 import pygame
 from support import import_folder
+from effects import Blood
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, coords):
@@ -44,6 +45,8 @@ class Player(pygame.sprite.Sprite):
         self.first_hit=False
         self.sec_hit=False
         self.third_hit=False
+
+        self.effects=pygame.sprite.Group()
 
     def import_character_assets(self):
         character_path='./graphics/character/'
@@ -337,15 +340,33 @@ class Player(pygame.sprite.Sprite):
        
     def find_damage(self, enemy):
         # print('h')
-        if self.frame_index>=2 and self.frame_index<3 and not self.first_hit:                
+        if self.frame_index>=2 and self.frame_index<3 and not self.first_hit and not enemy.dead:                
             enemy.health-=10
             self.first_hit=True
-        elif self.frame_index>=6 and self.frame_index<7 and not self.sec_hit:                
+            if self.facing_right:
+                x=enemy.rect.x+90
+            else:
+                x=enemy.rect.x-90
+            b=Blood((x, enemy.rect.y), not self.facing_right)
+            self.effects.add(b)
+        elif self.frame_index>=6 and self.frame_index<7 and not self.sec_hit and not enemy.dead:                
             enemy.health-=10
             self.sec_hit=True
-        elif self.frame_index>=10 and self.frame_index<11 and not self.third_hit:                
+            if self.facing_right:
+                x=enemy.rect.x+90
+            else:
+                x=enemy.rect.x-90
+            b=Blood((x, enemy.rect.y), not self.facing_right)
+            self.effects.add(b)
+        elif self.frame_index>=10 and self.frame_index<11 and not self.third_hit and not enemy.dead:                
             enemy.health-=10
             self.third_hit=True
+            if self.facing_right:
+                x=enemy.rect.x+90
+            else:
+                x=enemy.rect.x-90
+            b=Blood((x, enemy.rect.y), not self.facing_right)
+            self.effects.add(b)
         
         if enemy.health<0:
             enemy.health=0
@@ -361,7 +382,11 @@ class Player(pygame.sprite.Sprite):
                 if self.rect.x+62>=enemy.rect.x+108 and self.rect.x<=enemy.rect.x+160 and self.rect.top<=enemy.rect.bottom-62 and self.rect.bottom>=enemy.rect.top+122:
                     self.find_damage(enemy)
            
-
+    def handle_effects(self):
+        for e in self.effects.sprites():
+            e.animate()
+            if e.done:
+                pygame.sprite.Sprite.kill(e)
           
 
     def update(self, enemy):
@@ -370,6 +395,7 @@ class Player(pygame.sprite.Sprite):
         self.handle_enemy_collisions(enemy)
         self.get_status()
         self.animate()
+        self.handle_effects()
         self.slide_rect = (self.rect.x, self.rect.y+12, self.rect.width+12, self.rect.height-12)
 
         

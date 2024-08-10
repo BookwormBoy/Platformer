@@ -1,5 +1,6 @@
 import pygame
 from support  import *
+from effects import Blood
 
 class Ninja(pygame.sprite.Sprite):
     def __init__(self, pos):
@@ -18,6 +19,8 @@ class Ninja(pygame.sprite.Sprite):
         self.has_attacked=False
         self.health=100
         self.dead=False
+        self.effects=pygame.sprite.Group()
+
 
     def import_character_assets(self):
         character_path='./graphics/ninja/'
@@ -51,6 +54,12 @@ class Ninja(pygame.sprite.Sprite):
             self.image=flipped_image
 
         # print(self.frame_index, self.status, len(animation))
+
+    def handle_effects(self):
+        for e in self.effects.sprites():
+            e.animate()
+            if e.done:
+                pygame.sprite.Sprite.kill(e)
 
 
     def update(self, player):
@@ -107,16 +116,28 @@ class Ninja(pygame.sprite.Sprite):
         # print(self.rect.x,self.rect.x+self.rect.width, player.rect.x, player.rect.x+player.rect.width)
 
     def handle_player_collisions(self, player):
-        if self.attacking and self.frame_index>=7 and self.frame_index<11 and not self.dead:
+        if self.attacking and self.frame_index>=7 and self.frame_index<11 and not self.dead and not player.dead:
             if self.facing_right:
                 if ((player.rect.x+player.rect.width)>=(self.rect.x+104)) and (player.rect.x<=self.rect.x+236) and player.rect.top<=self.rect.bottom-62 and player.rect.bottom>=self.rect.top+122 and not self.has_attacked:
                     player.health-=10
                     self.has_attacked=True
+                    if self.facing_right:
+                        x=player.rect.x-30
+                    else:
+                        x=player.rect.x-140
+                    b=Blood((x, player.rect.y-130), not self.facing_right)
+                    self.effects.add(b)
                     # print('a')
             else:
                 if ((player.rect.x+player.rect.width)>=(self.rect.x+20)) and (player.rect.x<=self.rect.x+152) and player.rect.top<=self.rect.bottom-62 and player.rect.bottom>=self.rect.top+122 and not self.has_attacked:
                     player.health-=10
                     self.has_attacked=True
+                    if self.facing_right:
+                        x=player.rect.x-30
+                    else:
+                        x=player.rect.x-140
+                    b=Blood((x, player.rect.y-130), not self.facing_right)
+                    self.effects.add(b)
                     # print('b')
 
             if player.health<0:
@@ -129,4 +150,5 @@ class Ninja(pygame.sprite.Sprite):
         self.update(player)
         self.handle_player_collisions(player)
         self.animate()
+        self.handle_effects()
 
