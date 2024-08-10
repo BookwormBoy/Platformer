@@ -21,6 +21,7 @@ level_1={
     'off_block':'./levels/1/level_1_off_block.csv',
     'shell':'./levels/1/level_1_shells.csv',
     'firejet':'./levels/1/level_1_firejet.csv',
+    'goal':'./levels/1/level_1_goal.csv',
 
 }
 
@@ -37,7 +38,8 @@ level_2={
     'on_block':'./levels/2/level_2_on_block.csv',
     'off_block':'./levels/2/level_2_off_block.csv',
     'shell':'./levels/2/level_2_shells.csv',
-    'firejet':'./levels/2/level_2_firejet.csv'
+    'firejet':'./levels/2/level_2_firejet.csv',
+    'goal':'./levels/2/level_2_goal.csv'
     
 }
 
@@ -55,6 +57,7 @@ level_3={
     'off_block':'./levels/3/level_3_off_block.csv',
     'shell':'./levels/3/level_3_shells.csv',
     'firejet':'./levels/3/level_3_firejet.csv',
+    'goal':'./levels/3/level_3_goal.csv'
 
 }
 

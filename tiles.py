@@ -209,6 +209,10 @@ class Falling_Spike(pygame.sprite.Sprite):
         self.vel+=self.acc
         self.pos.y+=self.vel
         self.rect.y=int(self.pos.y)
+
+class Goal(Tile):
+    def __init__(self, pos, coords, surface):
+        super().__init__(pos, coords, surface)
     
 
 

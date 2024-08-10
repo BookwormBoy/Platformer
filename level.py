@@ -92,6 +92,9 @@ class Level:
                     elif tile_type=='firejet':
                         tile_surface=pygame.image.load('./graphics/terrain/flame.png')
                         sprite = Flame((x,y-32), (x-self.offset_x,y-self.offset_y))
+                    elif tile_type=='goal':
+                        tile_surface=pygame.image.load('./graphics/terrain/goal/tile000.png')
+                        sprite = Goal((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
                     elif tile_type=='ckpt':
                         tile_surface=pygame.image.load('./graphics/terrain/flag/tile000.png')
                         sprite = Checkpoint((x,y), (x-self.offset_x,y-self.offset_y), tile_surface)
@@ -251,8 +254,19 @@ class Level:
         # self.flames=pygame.sprite.Group()
         self.flames.add(self.on_flames)
 
+        goal_layout = import_csv_layout(level_csv['goal'])
+        self.goal = self.create_tile_group(goal_layout, 'goal', 'goal')
+        self.tiles.add(self.goal)
+
+
         checkpoint_layout = import_csv_layout(level_csv['checkpoint'])
         self.checkpoints = self.create_tile_group(checkpoint_layout, 'ckpt', 'ckpt')
+
+        self.background=pygame.sprite.Group()
+        surface=pygame.image.load('./graphics/terrain/backdrop.png')
+        sprite=Bg_Tile((0, 0), (0, 0), surface)
+        self.background.add(sprite)
+
         
 
     def scroll_x(self):
@@ -398,7 +412,7 @@ class Level:
                         # print('cx', tile.rect.x, player.rect.x, tile.rect.y, player.rect.y)
                         player.dead=True
                 else:
-                    if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True) or tile.__class__==Falling_Platform or tile.__class__==Bg_Tile:
+                    if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True) or tile.__class__==Falling_Platform or tile.__class__==Bg_Tile or tile.__class__==Goal:
                         pass
                     else:
                         if vel<0:
@@ -580,7 +594,7 @@ class Level:
                         self.fp_speed=tile.vel.y
                         # print(self.fp_speed)
 
-                if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True) or tile.__class__==Falling_Platform or tile.__class__==Bg_Tile:
+                if (tile.__class__==On_Block and self.on==False) or (tile.__class__==Off_Block and self.on==True) or tile.__class__==Falling_Platform or tile.__class__==Bg_Tile or tile.__class__==Goal:
                         pass
                 # print('c')
                 else:
@@ -815,6 +829,12 @@ class Level:
                 if fs.rect.colliderect(tile.rect):
                     pygame.sprite.Sprite.kill(fs)
 
+    def handle_goal(self):
+        player=self.player.sprite
+        for g in self.goal.sprites():
+            if g.rect.colliderect(player.rect):
+                self.level_clear=True
+
 
 
         
@@ -841,6 +861,7 @@ class Level:
         for tile in self.off_blocks.sprites():
             tile.change_sprite(self.on)
 
+        self.background.draw(self.display_surface)
         self.tiles.draw(self.display_surface)
         self.bg_sprites.draw(self.display_surface)
 
@@ -849,6 +870,7 @@ class Level:
             self.handle_shells()
             self.handle_flames()
             self.handle_checkpoints()
+            self.handle_goal()
             # self.handle_falling_spikes()
             if len(self.ninja)==1:
                 ninja.run(player)

@@ -36,7 +36,7 @@ def import_cut_graphics(path, block_size):
         for col in range(tile_num_x):
             x=col*block_size
             y=row*block_size
-            new_surf = pygame.Surface((block_size, block_size))
+            new_surf = pygame.Surface((block_size, block_size), flags=pygame.SRCALPHA)
             new_surf.blit(surface, (0,0), pygame.Rect(x,y, block_size, block_size))
             new_surf = pygame.transform.scale(new_surf, (block_size*2, block_size*2))
             cut_tiles.append(new_surf)
