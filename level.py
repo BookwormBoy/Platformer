@@ -4,9 +4,9 @@ from player import Player
 from settings import *
 from enemies import *
 from pygame import mixer
-# mixer.init()
-# mixer.music.load('./audio/level.ogg')
-# mixer.music.play(-1)
+mixer.init()
+mixer.music.load('./audio/level.ogg')
+mixer.music.play(-1)
 
 class Level:
     def __init__(self, level_data, current_level, level_csv, surface, create_overworld):
@@ -21,6 +21,7 @@ class Level:
         self.time=0
         self.current_level=current_level
         self.create_overworld=create_overworld
+        
 
         self.setup_level(level_data, level_csv)
         self.shift_x = 0
@@ -978,5 +979,6 @@ class Level:
 
         if self.level_clear:
             self.create_overworld(self.current_level, self.current_level+1)
+            mixer.quit()
 
                

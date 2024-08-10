@@ -122,6 +122,7 @@ class Overworld():
             elif keys[pygame.K_UP]:
                 print('h')
                 self.create_level(self.level_selected)
+                mixer.quit()
 
 
         else:
