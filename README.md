@@ -57,3 +57,5 @@ Initially I wanted to add a swinging/grappling hook mechanism but it proved too 
 More bosses. Perhaps one for each level.
 
 Better combat system with more powerful attacks if you get certain combos/streaks.
+
+Demo Link: https://youtu.be/EoG76wMe1T0
