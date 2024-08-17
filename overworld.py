@@ -90,7 +90,7 @@ class Overworld():
 
                     elif val=='4':
                         surface=pygame.Surface((16, 16))
-                        surface.fill('#12216e')
+                        surface.fill('#1c3e75')
                         sprite=Bg_Tile((x, y), (0, 0), surface)
                         self.sky.add(sprite)
 

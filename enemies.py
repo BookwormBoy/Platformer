@@ -119,7 +119,7 @@ class Ninja(pygame.sprite.Sprite):
         if self.attacking and self.frame_index>=7 and self.frame_index<11 and not self.dead and not player.dead:
             if self.facing_right:
                 if ((player.rect.x+player.rect.width)>=(self.rect.x+104)) and (player.rect.x<=self.rect.x+236) and player.rect.top<=self.rect.bottom-62 and player.rect.bottom>=self.rect.top+122 and not self.has_attacked:
-                    player.health-=10
+                    player.health-=30
                     self.has_attacked=True
                     if self.facing_right:
                         x=player.rect.x-30
@@ -130,7 +130,7 @@ class Ninja(pygame.sprite.Sprite):
                     # print('a')
             else:
                 if ((player.rect.x+player.rect.width)>=(self.rect.x+20)) and (player.rect.x<=self.rect.x+152) and player.rect.top<=self.rect.bottom-62 and player.rect.bottom>=self.rect.top+122 and not self.has_attacked:
-                    player.health-=10
+                    player.health-=30
                     self.has_attacked=True
                     if self.facing_right:
                         x=player.rect.x-30

@@ -3,10 +3,11 @@ from tiles import *
 from player import Player
 from settings import *
 from enemies import *
+# from main import level_music
 
 
 class Level:
-    def __init__(self, level_data, current_level, level_csv, surface, create_overworld):
+    def __init__(self, level_data, current_level, level_csv, surface, create_overworld, music1, music2):
         self.display_surface = surface
         self.offset_x=0
         self.offset_y=0
@@ -18,6 +19,8 @@ class Level:
         self.time=0
         self.current_level=current_level
         self.create_overworld=create_overworld
+        self.win_music=music1
+        self.boss_music=music2
         
 
         self.setup_level(level_data, level_csv)
@@ -973,7 +976,12 @@ class Level:
             self.time+=1
 
         if self.current_level==4 and ninja.health==0:
+            if not self.win:
+                self.boss_music.stop()
+                self.win_music.play(-1)
             self.win=True
+            
+
 
         if (player.dead and player.frame_index>=6 )or player.coords.y+player.rect.height>level_height:
             self.reset()        
